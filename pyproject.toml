@@ -1,0 +1,51 @@
+[project]
+name = "rag-poc"
+version = "0.1.0"
+description = "RAG POC — Gemini-powered document intelligence & retrieval system"
+requires-python = ">=3.11"
+dependencies = [
+    # Gemini API (embeddings + LLM)
+    "google-genai>=1.0.0",
+
+    # Document Processing
+    "pypdf>=5.0.0",
+    "python-docx>=1.1.0",
+    "openpyxl>=3.1.0",
+    "docling>=2.0.0",
+    "pytesseract>=0.3.10",
+    "Pillow>=10.0.0",
+
+    # Vector DB
+    "chromadb>=0.5.0",
+
+    # Chunking
+    "tiktoken>=0.7.0",
+    "langchain-text-splitters>=0.3.0",
+
+    # Application
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-multipart>=0.0.9",
+    "aiofiles>=24.0.0",
+
+    # Utilities
+    "python-dotenv>=1.0.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+

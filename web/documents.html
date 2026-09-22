@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG System — Documents</title>
+    <meta name="description" content="Upload and manage documents for the RAG system.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🔍</span>
+                    <span class="logo-text">RAG System</span>
+                </div>
+                <span class="badge">POC</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span class="nav-icon">💬</span>
+                    <span>Chat</span>
+                </a>
+                <a href="/documents" class="nav-item active">
+                    <span class="nav-icon">📄</span>
+                    <span>Documents</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-stats" id="sidebar-stats">
+                <h3 class="stats-title">System Status</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Documents</span>
+                    <span class="stat-value" id="stat-docs">—</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Chunks</span>
+                    <span class="stat-value" id="stat-chunks">—</span>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <span class="footer-text">Powered by Gemini API</span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="docs-main">
+            <header class="chat-header">
+                <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+                <h1 class="chat-title">Document Management</h1>
+            </header>
+
+            <!-- Upload Zone -->
+            <div class="upload-section">
+                <div class="upload-zone" id="upload-zone">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drag & drop files here</h3>
+                    <p>or click to browse</p>
+                    <p class="upload-formats">Supports: PDF, DOCX, XLSX, PNG, JPG, TXT</p>
+                    <input type="file" id="file-input" multiple accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg,.txt,.md" hidden>
+                </div>
+                <div class="upload-progress" id="upload-progress" hidden style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <p class="progress-text" id="progress-text">Uploading...</p>
+                </div>
+            </div>
+
+            <!-- Process Button -->
+            <div class="action-bar">
+                <button class="action-btn primary" id="process-btn" title="Process all pending documents">
+                    ⚡ Process All Pending
+                </button>
+                <button class="action-btn secondary" id="refresh-btn" title="Refresh document list">
+                    🔄 Refresh
+                </button>
+            </div>
+
+            <!-- Documents Table -->
+            <div class="docs-table-wrapper">
+                <table class="docs-table" id="docs-table">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Chunks</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="docs-tbody">
+                        <tr class="empty-row">
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <span class="empty-icon">📭</span>
+                                    <p>No documents yet. Upload some files to get started.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="delete-modal" hidden style="display: none;">
+        <div class="modal">
+            <h3>Delete Document</h3>
+            <p>Are you sure you want to delete <strong id="delete-file-name"></strong>?</p>
+            <p class="modal-warning">This will also remove all indexed chunks for this document.</p>
+            <div class="modal-actions">
+                <button class="action-btn secondary" id="cancel-delete">Cancel</button>
+                <button class="action-btn danger" id="confirm-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/documents.js"></script>
+</body>
+</html>

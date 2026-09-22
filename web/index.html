@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG System — Document Q&A</title>
+    <meta name="description" content="Ask questions about your documents using AI-powered retrieval and generation.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🔍</span>
+                    <span class="logo-text">RAG System</span>
+                </div>
+                <span class="badge">POC</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item active">
+                    <span class="nav-icon">💬</span>
+                    <span>Chat</span>
+                </a>
+                <a href="/documents" class="nav-item">
+                    <span class="nav-icon">📄</span>
+                    <span>Documents</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-stats" id="sidebar-stats">
+                <h3 class="stats-title">System Status</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Documents</span>
+                    <span class="stat-value" id="stat-docs">—</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Chunks</span>
+                    <span class="stat-value" id="stat-chunks">—</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">LLM Model</span>
+                    <span class="stat-value" id="stat-model">—</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Embed Model</span>
+                    <span class="stat-value" id="stat-embed">—</span>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <span class="footer-text">Powered by Gemini API</span>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <!-- Header -->
+            <header class="chat-header">
+                <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+                <h1 class="chat-title">Document Q&A</h1>
+                <button class="clear-btn" id="clear-chat" title="Clear conversation">🗑️ Clear</button>
+            </header>
+
+            <!-- Messages -->
+            <div class="messages-container" id="messages-container">
+                <div class="welcome-message" id="welcome-message">
+                    <div class="welcome-icon">🔍</div>
+                    <h2>Welcome to RAG System</h2>
+                    <p>Ask questions about your indexed documents and get AI-powered, source-cited answers.</p>
+                    <div class="welcome-hints">
+                        <button class="hint-chip" onclick="askQuestion('What topics are covered in the documents?')">
+                            What topics are covered?
+                        </button>
+                        <button class="hint-chip" onclick="askQuestion('Summarize the key points from the documents')">
+                            Summarize key points
+                        </button>
+                        <button class="hint-chip" onclick="askQuestion('What are the main findings?')">
+                            Main findings?
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <textarea
+                        id="query-input"
+                        class="query-input"
+                        placeholder="Ask a question about your documents..."
+                        rows="1"
+                        aria-label="Question input"
+                    ></textarea>
+                    <button class="send-btn" id="send-btn" aria-label="Send question" disabled>
+                        <span class="send-icon">➤</span>
+                    </button>
+                </div>
+                <p class="input-hint">Press Enter to send • Shift+Enter for new line</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
