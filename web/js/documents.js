@@ -313,6 +313,7 @@ function getTypeIcon(ext) {
         '.jpeg': '🖼️',
         '.txt': '📝',
         '.md': '📝',
+        '.eml': '✉️',
     };
     return icons[ext] || '📄';
 }

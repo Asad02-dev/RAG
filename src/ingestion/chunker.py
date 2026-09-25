@@ -137,21 +137,26 @@ class Chunker:
                 if not content:
                     continue
 
-                heading = (
-                    split.metadata.get("heading_3")
-                    or split.metadata.get("heading_2")
-                    or split.metadata.get("heading_1")
-                    or "Untitled Section"
-                )
+                h3 = split.metadata.get("heading_3")
+                h2 = split.metadata.get("heading_2")
+                h1 = split.metadata.get("heading_1")
 
+                if h2 and h2.lower().startswith("attachment:") and h3 and not h3.lower().startswith("attachment:"):
+                    heading = f"{h2} - {h3}"
+                else:
+                    heading = h3 or h2 or h1 or "Untitled Section"
+
+                import re
                 page = 1
-                if "heading_2" in split.metadata:
-                    h2 = split.metadata["heading_2"]
-                    if h2.lower().startswith("page "):
-                        try:
-                            page = int(h2.split()[-1])
-                        except ValueError:
-                            pass
+                for candidate in (h3, h2, heading):
+                    if candidate:
+                        m = re.search(r"\bpage\s+(\d+)\b", candidate, re.IGNORECASE)
+                        if m:
+                            try:
+                                page = int(m.group(1))
+                                break
+                            except ValueError:
+                                pass
 
                 sections.append({
                     "heading": heading,
@@ -186,9 +191,10 @@ class Chunker:
             content = markdown[start:end].strip()
 
             page = 1
-            if heading.lower().startswith("page "):
+            m = re.search(r"\bpage\s+(\d+)\b", heading, re.IGNORECASE)
+            if m:
                 try:
-                    page = int(heading.split()[-1])
+                    page = int(m.group(1))
                 except ValueError:
                     pass
 

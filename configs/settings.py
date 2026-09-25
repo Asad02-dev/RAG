@@ -42,6 +42,7 @@ class Settings(BaseSettings):
     # ── Generation ──
     temperature: float = 0.2
     max_output_tokens: int = 2048
+    thinking_budget: int = 1024
 
     @property
     def documents_path(self) -> Path:

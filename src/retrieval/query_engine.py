@@ -38,6 +38,7 @@ class QueryEngine:
         fallback_models: list[str] | None = None,
         temperature: float = 0.2,
         max_output_tokens: int = 2048,
+        thinking_budget: int = 1024,
         top_k: int = 5,
     ):
         self.search_client = search_client
@@ -51,6 +52,7 @@ class QueryEngine:
         )
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
+        self.thinking_budget = thinking_budget
         self.top_k = top_k
 
     def query(self, question: str) -> QueryResponse:
@@ -118,13 +120,17 @@ class QueryEngine:
             # Try model; retry once only on transient 503 error
             for attempt in range(2):
                 try:
+                    config_kwargs = {
+                        "temperature": self.temperature,
+                        "max_output_tokens": self.max_output_tokens,
+                    }
+                    if "gemini-3" in model_candidate:
+                        config_kwargs["thinking_config"] = types.ThinkingConfig(thinking_budget=self.thinking_budget)
+                        
                     response = self.client.models.generate_content(
                         model=model_candidate,
                         contents=full_prompt,
-                        config=types.GenerateContentConfig(
-                            temperature=self.temperature,
-                            max_output_tokens=self.max_output_tokens,
-                        ),
+                        config=types.GenerateContentConfig(**config_kwargs),
                     )
                     answer = response.text or "No response generated."
                     active_model = model_candidate

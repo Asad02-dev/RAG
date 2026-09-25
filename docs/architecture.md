@@ -13,7 +13,7 @@ The system is split into two primary operational phases:
 ```mermaid
 graph TD
     subgraph Filesystem
-        Docs["data/documents/<br/>(*.pdf, *.docx, *.xlsx, *.png, *.txt, *.md)"]
+        Docs["data/documents/<br/>(*.pdf, *.docx, *.xlsx, *.png, *.txt, *.md, *.eml)"]
         Manifest[".ingestion_manifest.json"]
         ChromaStore[("data/chroma_db/<br/>(ChromaDB SQLite + HNSW index)")]
     end
@@ -46,7 +46,7 @@ graph TD
 The ingestion workflow is managed by [src/ingestion/pipeline.py](file:///c:/MyProjects/RAG/src/ingestion/pipeline.py) and coordinates 5 specialized components:
 
 ### 2.1 File Manager (`file_manager.py`)
-- **Responsibility**: Scans `data/documents/` recursively for supported extensions (`.pdf`, `.docx`, `.xlsx`, `.png`, `.jpg`, `.jpeg`, `.txt`, `.md`).
+- **Responsibility**: Scans `data/documents/` recursively for supported extensions (`.pdf`, `.docx`, `.xlsx`, `.png`, `.jpg`, `.jpeg`, `.txt`, `.md`, `.eml`).
 - **State Tracking**: Maintains `.ingestion_manifest.json` in the documents directory. Each entry tracks:
   - `ingested` (bool)
   - `ingested_at` (ISO timestamp)
@@ -67,6 +67,8 @@ Standardizes diverse file formats into clean, structured **Markdown**:
   - Uses `openpyxl` in read-only data mode. Iterates through each sheet, extracting headers and rows, converting every sheet into a distinct Markdown table section prefixed with `## Sheet: {SheetName}`.
 - **Images (`.png`, `.jpg`, `.jpeg`)**:
   - Preprocesses images using `Pillow` and applies Optical Character Recognition (OCR) using `pytesseract`.
+- **Emails (`.eml`)**:
+  - Parses RFC 822 MIME messages using standard library `email` package. Extracts metadata (Subject, From, To, Cc, Date), body (plain text or parsed HTML), attachments summary, and recursively processes attached documents (PDFs, Word documents, Excel sheets, text files) into nested markdown sections prefixed with `Attachment: {filename}`.
 - **Text & Markdown (`.txt`, `.md`)**:
   - Direct UTF-8 ingestion with replacement error handling.
 

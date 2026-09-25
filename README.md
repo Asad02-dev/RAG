@@ -37,6 +37,7 @@ flowchart TB
   - **Word (`.docx`)**: Structural hierarchy extraction via `python-docx` into Markdown.
   - **Excel (`.xlsx`)**: Multi-sheet extraction via `openpyxl` converting spreadsheets to Markdown tables.
   - **Images (`.png`, `.jpg`, `.jpeg`)**: Optical Character Recognition via Tesseract / PIL.
+  - **Emails (`.eml`)**: RFC 822 MIME message extraction with headers (Subject, From, To, Date), body (plain text & HTML conversion), attachments summary, and recursive document content extraction for attached files (PDF, DOCX, XLSX, etc.).
   - **Plain Text / Markdown (`.txt`, `.md`)**: Native clean file ingestion.
 - ✂️ **Intelligent Layout-Aware Chunking**:
   - Respects section headers (`#`, `##`, `###`) to preserve context.
@@ -220,7 +221,7 @@ Available commands within the CLI:
 You can ingest documents in three ways:
 
 1. **Via Web UI**: Navigate to [http://127.0.0.1:8000/documents](http://127.0.0.1:8000/documents) and drag & drop your files into the upload area.
-2. **Via Drop Directory**: Copy `.pdf`, `.docx`, `.xlsx`, `.png`, `.jpg`, `.txt`, or `.md` files directly into `data/documents/`, then click **⚡ Process All Pending** in the UI or run `ingest` in the CLI.
+2. **Via Drop Directory**: Copy `.pdf`, `.docx`, `.xlsx`, `.png`, `.jpg`, `.txt`, `.md`, or `.eml` files directly into `data/documents/`, then click **⚡ Process All Pending** in the UI or run `ingest` in the CLI.
 3. **Via REST API**:
    ```bash
    curl -X POST http://127.0.0.1:8000/api/ingest \

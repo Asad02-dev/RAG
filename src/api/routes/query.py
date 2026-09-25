@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 @router.post("/query", response_model=QueryResponse)
-async def query_documents(request: QueryRequest):
+def query_documents(request: QueryRequest):
     """Ask a question and get a grounded answer from indexed documents."""
     engine = get_query_engine()
     result = engine.query(request.question)

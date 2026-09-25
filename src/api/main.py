@@ -68,6 +68,7 @@ def _initialize_components():
         fallback_models=_settings.fallback_models_list,
         temperature=_settings.temperature,
         max_output_tokens=_settings.max_output_tokens,
+        thinking_budget=_settings.thinking_budget,
         top_k=_settings.top_k_results,
     )
 
@@ -159,7 +160,7 @@ async def serve_documents_page():
 
 
 @app.get("/api/health", response_model=HealthResponse, tags=["System"])
-async def health_check():
+def health_check():
     """Check system health and configuration."""
     idx_stats = _indexer.get_stats() if _indexer else {"total_chunks": 0}
     return HealthResponse(

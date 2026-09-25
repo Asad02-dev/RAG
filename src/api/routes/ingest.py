@@ -12,7 +12,7 @@ router = APIRouter()
 
 
 @router.post("/ingest", response_model=IngestResponse)
-async def ingest_documents(files: list[UploadFile] = File(None)):
+def ingest_documents(files: list[UploadFile] = File(None)):
     """Upload and process documents, or process all pending files in data/documents/.
 
     If files are uploaded, saves them to data/documents/ first, then processes.
@@ -39,7 +39,7 @@ async def ingest_documents(files: list[UploadFile] = File(None)):
 
 
 @router.get("/documents", response_model=list[DocumentInfo])
-async def list_documents():
+def list_documents():
     """List all documents and their ingestion status."""
     file_manager = get_file_manager()
     files = file_manager.scan_documents()
@@ -60,7 +60,7 @@ async def list_documents():
 
 
 @router.delete("/documents/{file_name}")
-async def delete_document(file_name: str):
+def delete_document(file_name: str):
     """Delete a document and its indexed chunks."""
     file_manager = get_file_manager()
     indexer = get_indexer()
@@ -85,7 +85,7 @@ async def delete_document(file_name: str):
 
 
 @router.get("/stats", response_model=StatsResponse)
-async def get_stats():
+def get_stats():
     """Get system statistics."""
     file_manager = get_file_manager()
     stats = file_manager.get_stats()

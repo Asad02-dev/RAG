@@ -85,7 +85,7 @@ Content-Type: multipart/form-data
 ```
 
 #### Request Body
-- `files` *(optional, file or array of files)*: Document files (`.pdf`, `.docx`, `.xlsx`, `.png`, `.jpg`, `.jpeg`, `.txt`, `.md`).
+- `files` *(optional, file or array of files)*: Document files (`.pdf`, `.docx`, `.xlsx`, `.png`, `.jpg`, `.jpeg`, `.txt`, `.md`, `.eml`).
 
 #### Example Request (Upload Files)
 ```bash
