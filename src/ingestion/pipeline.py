@@ -150,17 +150,47 @@ class IngestionPipeline:
                 progress.update(task, advance=1)
             return 0
 
-        # Step 3: Embed
-        embed_inputs = [
-            {"text": c.content, "title": c.section_heading}
-            for c in chunks
-        ]
-        embeddings = self.embedder.embed_document_chunks_batch(embed_inputs)
+        # Step 3 & 4: Embed and Index in batches to save progress
+        existing_ids = set(self.indexer.get_chunk_ids_by_source(doc.source_file))
+        missing_chunks = [c for c in chunks if c.chunk_id not in existing_ids]
+        
+        chunk_count = len(chunks)
 
-        # Step 4: Index
-        # Delete existing chunks for this file (for re-ingestion)
-        self.indexer.delete_by_source(doc.source_file)
-        chunk_count = self.indexer.add_chunks(chunks, embeddings)
+        if not missing_chunks:
+            logger.info(f"All {chunk_count} chunks for {file_info.name} are already indexed. Resuming...")
+            self.file_manager.mark_ingested(file_info, chunk_count)
+            if progress and task is not None:
+                progress.update(task, advance=1)
+            return chunk_count
+
+        if existing_ids:
+            logger.info(
+                f"Resuming ingestion for {file_info.name}. "
+                f"Found {len(existing_ids)} existing chunks, {len(missing_chunks)} remaining."
+            )
+        else:
+            # Only delete if we are starting fresh, to clear any potential orphans
+            self.indexer.delete_by_source(doc.source_file)
+
+        batch_size = self.embedder.batch_size
+
+        for i in range(0, len(missing_chunks), batch_size):
+            batch_chunks = missing_chunks[i : i + batch_size]
+            embed_inputs = [
+                {"text": c.content, "title": c.section_heading}
+                for c in batch_chunks
+            ]
+            
+            # Embed the current batch
+            batch_embeddings = self.embedder.embed_document_chunks_batch(embed_inputs)
+            
+            # Index the current batch immediately to save progress
+            self.indexer.add_chunks(batch_chunks, batch_embeddings)
+            
+            # Rate limiting between batches
+            if i + batch_size < len(missing_chunks):
+                logger.debug(f"Waiting {self.embedder.delay_seconds}s before next batch...")
+                time.sleep(self.embedder.delay_seconds)
 
         # Step 5: Update manifest
         self.file_manager.mark_ingested(file_info, chunk_count)

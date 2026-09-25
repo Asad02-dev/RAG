@@ -5,11 +5,12 @@ import time
 from typing import Optional
 
 from google import genai
+from google.genai import types
 
 logger = logging.getLogger(__name__)
 
 # Rate limiting constants for Gemini free tier
-DEFAULT_BATCH_SIZE = 5
+DEFAULT_BATCH_SIZE = 50
 DEFAULT_DELAY_SECONDS = 1.0
 
 
@@ -69,12 +70,15 @@ class Embedder:
         for i in range(0, len(chunks), self.batch_size):
             batch = chunks[i : i + self.batch_size]
 
+            batch_texts = []
             for chunk in batch:
                 title = chunk.get("title", "none")
                 text = chunk["text"]
+                prefixed = f"title: {title} | text: {text}"
+                batch_texts.append(prefixed)
 
-                embedding = self.embed_document_chunk(text, title)
-                all_embeddings.append(embedding)
+            batch_embs = self._embed_batch(batch_texts)
+            all_embeddings.extend(batch_embs)
 
             # Rate limiting between batches
             if i + self.batch_size < len(chunks):
@@ -87,7 +91,7 @@ class Embedder:
         logger.info(f"Embedded {len(all_embeddings)} chunks total")
         return all_embeddings
 
-    def _embed_single(self, text: str, max_retries: int = 3) -> list[float]:
+    def _embed_single(self, text: str, max_retries: int = 6) -> list[float]:
         """Embed a single text string with retry logic."""
         if not self.api_key or self.api_key == "dummy-api-key":
             raise ValueError(
@@ -101,6 +105,37 @@ class Embedder:
                     contents=text,
                 )
                 return result.embeddings[0].values
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    wait = 2 ** (attempt + 1)
+                    logger.warning(
+                        f"Embedding failed (attempt {attempt + 1}/{max_retries}): {e}. "
+                        f"Retrying in {wait}s..."
+                    )
+                    time.sleep(wait)
+                else:
+                    logger.error(f"Embedding failed after {max_retries} attempts: {e}")
+                    raise
+
+    def _embed_batch(self, texts: list[str], max_retries: int = 6) -> list[list[float]]:
+        """Embed a list of text strings with retry logic."""
+        if not self.api_key or self.api_key == "dummy-api-key":
+            raise ValueError(
+                "GEMINI_API_KEY is not configured. Please set your Gemini API key in the .env file."
+            )
+            
+        content_objects = [
+            types.Content(parts=[types.Part.from_text(text=t)]) 
+            for t in texts
+        ]
+
+        for attempt in range(max_retries):
+            try:
+                result = self.client.models.embed_content(
+                    model=self.model,
+                    contents=content_objects,
+                )
+                return [emb.values for emb in result.embeddings]
             except Exception as e:
                 if attempt < max_retries - 1:
                     wait = 2 ** (attempt + 1)

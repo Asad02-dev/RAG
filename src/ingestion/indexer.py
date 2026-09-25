@@ -139,6 +139,14 @@ class Indexer:
 
         return 0
 
+    def get_chunk_ids_by_source(self, source_file: str) -> list[str]:
+        """Get all chunk IDs for a specific source file."""
+        results = self.collection.get(
+            where={"source_file": source_file},
+            include=[],
+        )
+        return results["ids"]
+
     def get_stats(self) -> dict:
         """Return collection statistics."""
         count = self.collection.count()

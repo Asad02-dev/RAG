@@ -48,7 +48,7 @@ class QueryEngine:
         self.fallback_models = (
             fallback_models
             if fallback_models is not None
-            else ["gemini-3-flash-preview", "gemini-3.5-flash", "gemini-3.6-flash"]
+            else ["gemma-4-12b-a4b-it", "gemma-4-26b-a4b-it"]
         )
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens

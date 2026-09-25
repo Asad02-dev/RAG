@@ -19,5 +19,12 @@
     "modified_at": "2026-09-23T15:15:37.395416+00:00",
     "chunk_count": 61,
     "size_bytes": 2623311
+  },
+  "sanfordlimited_apacproperty_152548.eml": {
+    "ingested": true,
+    "ingested_at": "2026-09-25T13:16:19.316096+00:00",
+    "modified_at": "2026-09-25T12:24:44.241214+00:00",
+    "chunk_count": 363,
+    "size_bytes": 31600334
   }
 }

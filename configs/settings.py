@@ -17,8 +17,8 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_embed_model: str = "gemini-embedding-2"
     gemini_llm_model: str = "gemma-4-26b-a4b-it"
-    gemini_llm_model_complex: str = "gemini-3.1-pro-preview"
-    gemini_llm_fallback_models: str = "gemini-3-flash-preview,gemini-3.5-flash,gemini-3.6-flash"
+    gemini_llm_model_complex: str = "gemma-4-26b-a4b-it"
+    gemini_llm_fallback_models: str = "gemma-4-12b-a4b-it,gemma-4-26b-a4b-it"
 
     @property
     def fallback_models_list(self) -> list[str]:

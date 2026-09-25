@@ -57,6 +57,7 @@ def create_components():
         search_client=search_client,
         api_key=settings.gemini_api_key,
         llm_model=settings.gemini_llm_model,
+        fallback_models=settings.fallback_models_list,
         temperature=settings.temperature,
         max_output_tokens=settings.max_output_tokens,
         top_k=settings.top_k_results,

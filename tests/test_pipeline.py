@@ -16,6 +16,8 @@ class MockEmbedder:
 
     def __init__(self, dim: int = 4):
         self.dim = dim
+        self.batch_size = 5
+        self.delay_seconds = 0.0
 
     def embed_document_chunks_batch(self, chunks: list[dict]) -> list[list[float]]:
         return [[0.1] * self.dim for _ in chunks]
