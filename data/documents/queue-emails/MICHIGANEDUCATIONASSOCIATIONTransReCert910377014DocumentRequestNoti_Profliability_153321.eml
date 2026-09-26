@@ -1,0 +1,161 @@
+Received: from LV1PR18MB988705.namprd18.prod.outlook.com
+ (2603:10b6:408:3f4::21) by MW4PR18MB5036.namprd18.prod.outlook.com with
+ HTTPS; Sat, 26 Sep 2026 02:00:09 +0000
+Received: from DM6PR02CA0109.namprd02.prod.outlook.com (2603:10b6:5:1b4::11)
+ by LV1PR18MB988705.namprd18.prod.outlook.com (2603:10b6:408:3f4::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.21.406.12; Sat, 26 Sep
+ 2026 02:00:07 +0000
+Received: from DM2PEPF00003FC6.namprd04.prod.outlook.com
+ (2603:10b6:5:1b4:cafe::1) by DM6PR02CA0109.outlook.office365.com
+ (2603:10b6:5:1b4::11) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.21.451.18 via Frontend Transport; Sat,
+ 26 Sep 2026 02:00:07 +0000
+Authentication-Results: mx.microsoft.com 1; spf=pass (sender IP is
+ 67.231.156.20) smtp.mailfrom=transre.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=transre.com;compauth=pass
+ reason=100
+Received-SPF: Pass (protection.outlook.com: domain of transre.com designates
+ 67.231.156.20 as permitted sender) receiver=protection.outlook.com;
+ client-ip=67.231.156.20; helo=mx0b-00176401.pphosted.com; pr=C
+Received: from mx0b-00176401.pphosted.com (67.231.156.20) by
+ DM2PEPF00003FC6.mail.protection.outlook.com (10.167.23.25) with Microsoft
+ SMTP Server (version=TLS1_3, cipher=TLS_AES_256_GCM_SHA384) id 15.21.451.8
+ via Frontend Transport; Sat, 26 Sep 2026 02:00:07 +0000
+Received: from pps.filterd (m0095176.ppops.net [127.0.0.1])
+	by mx0a-00176401.pphosted.com (8.18.1.11/8.18.1.11) with ESMTP id 68PMsKDe1727140;
+	Fri, 25 Sep 2026 22:00:05 -0400
+Received: from azinf01.transre.com ([20.72.89.240])
+	by mx0a-00176401.pphosted.com (PPS) with ESMTP id 4gx08grfvc-1
+	for <profliab@transre.com>; Fri, 25 Sep 2026 22:00:04 -0400 (EDT)
+Received: by azinf01.transre.com (Postfix, from userid 100)
+	id 6FE1A8074CE; Fri, 25 Sep 2026 22:00:03 -0400 (EDT)
+To: <profliab@transre.com>
+Content-Type: text/html
+Subject: MICHIGAN EDUCATION ASSOCIATION. TransRe Cert # 910377014 - Document Request Notification #910377014202508112025,DFU,EM Request/Cede Policy
+Message-ID: <20260926020003.6FE1A8074CE@azinf01.transre.com>
+Date: Fri, 25 Sep 2026 22:00:03 -0400
+From: "Williams, Tonya" <twilliams@transre.com>
+X-CLX-Response: 1TFkXGxwSEQpMehcaEQpZRBdrYElMQGVDWkwbXREKWFgXbnp9ZgVAGxt5G28
+ RCnhOF2YaRRx7YxxeTBMfEQp5TBdlRlx4QmcTZl1kHREKQ0gXBxsdHBEKQ1kXBxsTHhEKQ0kXGg
+ QaGhoRCllNF2dmchEKWUkXGnEaEBp3BhseEnEYExAadwYYGgYaEQpZXhdoY3kRCklGF15YS0RZS
+ 15GS0ReQ0lCRUZOQ0RNWXVCRVleT04RCklHF3hPTREKQ04XQWFpbH9sGFlhB0dLS1ASExoef2dz
+ T20fZntQB3NSW3MRClhcFx8EGgQeGBMFGxoEGxoaBBsZHgQZHhAbHhofGhEKXlkXQh1nXGsRCk1
+ cFxwZEQpMWhdsaU1NaxEKTEYXY2traxEKQk8XaVppHGRpfGB6aWgRCkNaFxgaBB0YBBITBBgeGh
+ EKQl4XGxEKQkUXb2NpeWxAbVwFa34RCkJOF2YaRRx7YxxeTBMfEQpCTBduen1mBUAbG3kbbxEKQ
+ mwXZH9FbHgbRkhHGn8RCkJAF21iTWBEYl1mZ2FwEQpCWBdhckYbXR5sbm1wXREKTV4XGxEKWlgX
+ GxEKeUMXbBgYXFJcQVNGHUMRCllLFxsbGBMTEQpwaBdkeHwZb2sBHRMaUBAZGhEKcGgXaWNEUG9
+ ZbAFNQh4QGRoRCnBoF28eYF5eUl8SQx9NEBkaEQpwaBdick1ua0RMc1IBfBAZGhEKcGgXY1JkGR
+ 17QENuW0QQGRoRCnBsF2QebXkaZl1Mflt8EB0aEQptfhcbEQpYTRdLESA=
+X-Proofpoint-Spam-Info: AW1haW4tMjYwOTI2MDAwNyBTYWx0ZWRfXx7F7B584bPo4
+ OkXIj+V+iPmMi7kYWTazQfDXdOXUDBU40NP9UhwCacgzmMtEDtEdWVO3yT99Z/CoQIWxSmRV7fo
+ D0ZvGVyiK61faEG5+2j4BdLz+bv1VWnNlgcMjjwFEsRqREvuk4bU
+X-Authority-Analysis: v=2.4 cv=ULVIjyfy c=1 sm=1 tr=0 ts=6ab72724 cx=c_pps
+ a=uvRxWi+exFFcqIp3yuWrNw==:117 a=uvRxWi+exFFcqIp3yuWrNw==:17
+ a=VdqzKS8jKosA:10 a=JyWEw40TUO5AK6tc77iI:22 a=hdmbLmorsdtHqpKHF5uL:22
+ a=JIU32mUNYSVNIzOjLGpn:22 a=T3thvhnHAAAA:8 a=AqJyLjlUQdtVmYR6EkIA:9
+ a=MenrR9TjVAP7H71ZyBDgYbqSsIg=:19 a=d2dn0DQrRLJu9vZL:21 a=_W_S_7VecoQA:10
+ a=nYALv-nXSisrRN3Y2plv:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjYwOTI2MDAwNyBTYWx0ZWRfX44+pJn50rn3T
+ Gl7rZPhNTxT/z1Qm7vIQVuZHKVNeHmZEKOO9iV3a6e6QsUdJXS9Uu+2gmBVVJ88gc0HvyBGMKEq
+ FSBTJxypyD9hyLVxpJbKUsfC2dycKjf1o1l3gm4829Fi8WGM0iqm6/7H0+9pSi535kaCfhjYFjo
+ 38ZNnk5MRtg8Xt6G1gQhMCXnxoDcvAcI7LG006K+vBVGHRGqmBXp0xaLyVcHA7FLRXS3eHTRXXO
+ zeubDjHLfl5w59FBv9e87llqmKxVduQBIkO+C9Y80MzExUhPR49XkHiUSXykQZ2lcPT7hIJqD7A
+ 80jdSy4xiw7Cj9Jb7MKj99Dn6HAX+mdmNg821qmyL+A8FzjaJv3t2bVzBJPpZuUzK5gZELnp3FB
+ p3G7pD55Sv6wymhTyqLLIBdz09GqoxQq3g6oAb9GNqcwXHkO90J7zGgGMGSQyDrSSfiEBnnZJOp
+ V6NRPe7XgGTqrhOw7pO3PsHFODo96sTP4VHFiU1agaETNJi3FuF4qwniApjWh
+X-CLX-Shades: MLX
+X-Proofpoint-ORIG-GUID: kKCFUF2sK-maaz8904UMYeG5LQz-YxqY
+X-Proofpoint-GUID: kKCFUF2sK-maaz8904UMYeG5LQz-YxqY
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1176,Hydra:6.1.134,FMLib:17.12.100.49
+ definitions=2026-09-25_05,2026-09-21_02,2025-10-01_01
+X-Proofpoint-Spam-Reason: safe
+Return-Path: twilliams@transre.com
+X-MS-Exchange-Organization-ExpirationStartTime: 26 Sep 2026 02:00:07.3388
+ (UTC)
+X-MS-Exchange-Organization-ExpirationStartTimeReason: OriginalSubmit
+X-MS-Exchange-Organization-ExpirationInterval: 1:00:00:00.0000000
+X-MS-Exchange-Organization-ExpirationIntervalReason: OriginalSubmit
+X-MS-Exchange-Organization-Network-Message-Id: 3dacfb05-ce07-4667-a1ad-08df1b71e395
+X-EOPAttributedMessage: 0
+X-EOPTenantAttributedMessage: bd294dca-0970-41de-b5d4-ab76fa472bf5:0
+X-MS-Exchange-Organization-MessageDirectionality: Incoming
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DM2PEPF00003FC6:EE_|LV1PR18MB988705:EE_|MW4PR18MB5036:EE_
+X-MS-Exchange-Organization-AuthSource: DM2PEPF00003FC6.namprd04.prod.outlook.com
+X-MS-Exchange-Organization-AuthAs: Anonymous
+X-MS-Office365-Filtering-Correlation-Id: 3dacfb05-ce07-4667-a1ad-08df1b71e395
+X-MS-Exchange-AtpMessageProperties: SA
+X-MS-Exchange-Organization-SCL: -1
+X-Microsoft-Antispam: BCL:0;ARA:13230040|7149299003|82310400026|260918215300599003|260918224100599003|18003699003|19002099009|11063799006|10067099003|5063699009|57112099003|8096899003|55112099003|4076899003;
+X-Forefront-Antispam-Report: CIP:67.231.156.20;CTRY:US;LANG:en;SCL:-1;SRV:;IPV:CAL;SFV:NSPM;H:mx0b-00176401.pphosted.com;PTR:mx0b-00176401.pphosted.com;CAT:NONE;SFS:(13230040)(7149299003)(82310400026)(260918215300599003)(260918224100599003)(18003699003)(19002099009)(11063799006)(10067099003)(5063699009)(57112099003)(8096899003)(55112099003)(4076899003);DIR:INB;
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Sep 2026 02:00:07.0802
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3dacfb05-ce07-4667-a1ad-08df1b71e395
+X-MS-Exchange-CrossTenant-Id: bd294dca-0970-41de-b5d4-ab76fa472bf5
+X-MS-Exchange-CrossTenant-AuthSource: DM2PEPF00003FC6.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: Internet
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV1PR18MB988705
+X-MS-Exchange-Transport-EndToEndLatency: 00:00:02.3729961
+X-MS-Exchange-Processed-By-BccFoldering: 15.21.0451.014
+X-Microsoft-Antispam-Mailbox-Delivery:
+	ucf:0;jmr:0;auth:0;dest:I;ENG:(910005)(944506478)(944626604)(920097)(930201)(20251009189)(140003);
+X-Microsoft-Antispam-Message-Info:
+	=?iso-8859-1?Q?fMOrd3pfLcg+p0e4Kzqzl+qiMH0yRfasQufmgBmclTGbZlu+Z90vvTUihz?=
+ =?iso-8859-1?Q?QbB3BOCp/0X8YiAkDcu3e5B/I0JxdDsvJuOoxwgyBl9RFsSJF0IUyIVlCx?=
+ =?iso-8859-1?Q?JvJ8xxCXK9SONSlzXjx5b5/mURwG2Ch2mmUamlvXHbfp5bS4DbdtXwBcyd?=
+ =?iso-8859-1?Q?D68LRTl0acXrvF8+IwDvruIvnnK0IBzIr0e1yHr+ys+k3o5b7orKUlysSF?=
+ =?iso-8859-1?Q?+3es30riYyuNQfrMf14MfiO2c2v+iLBnLQ5kMbbkxCHvsgjrcbolgqHm0N?=
+ =?iso-8859-1?Q?y9UDu3JK+DVijxh6VBr40ne3DFfgwq1HrKvOMyowzYc+XNBOz8D4FWNHca?=
+ =?iso-8859-1?Q?a1PHd175HfuTCBZRvQ0lHodLvn9HZsrFnVsrVGa6B0tXj9o6q/x8ougrJ4?=
+ =?iso-8859-1?Q?m9ml1SU20IhVJGswP+DARHmZaZ50NKgipy8aHGo1y6Bc8ZdcHVya3zdJU8?=
+ =?iso-8859-1?Q?R0M1TaU5HxmwF592/Nkf4HaURwT2lONtfiK5deuMGnmn/WmNb/O8Z43nr8?=
+ =?iso-8859-1?Q?2gJAcfzfHqkYOusmYHfGnGx671j7dJ1PFjFTmuZ9VEC1M6jATILrNt7sXb?=
+ =?iso-8859-1?Q?ZUEvej7l1cMcvRNIdu4xsAduHcIVodC5Iktgx9TYYXthr0HwySNgnRC56H?=
+ =?iso-8859-1?Q?Ll6lBc+l5yzsumrj1fQ8nkbD0Raior3foevMNz1SzjerffExTLLpYzsM3U?=
+ =?iso-8859-1?Q?FOCF1qwVuEjwM2HoS7VNFntd2v+5XJzlmqiyZUcVuQNxqO+r4vLit0yz8F?=
+ =?iso-8859-1?Q?yhjttQmQjv9t4iU3IMHoXWS/BMzXOmfvCJVG/UGauqBVV9nrVq7nh1sPl2?=
+ =?iso-8859-1?Q?aZ33Ww/vdTMymhnJ4wiQtwzoCGV7obnji3reUaJTSk0blSkXVST/gIEs2v?=
+ =?iso-8859-1?Q?jKBA17XuH70x/WZIS8AKQAUMBa/DYj5YhsnD/tm68u1i6eTxnNtu+KHJIc?=
+ =?iso-8859-1?Q?jpWzCLOyoXygkPkt9b3VvKB5L3ApvnuqGY2VgoQJ6kNBfauQ0EAYOnkQ2t?=
+ =?iso-8859-1?Q?YyLYuqLuYHOwuR8BrskpGDS7vPiJWL/ut5aMDA29CIVBFsuZogPw8e46+k?=
+ =?iso-8859-1?Q?Nl/A2+mSOQmDn6JtMDdHLx2h3p8VY7gXrWoZTx6fqLVuBMFIXXomnJYX3l?=
+ =?iso-8859-1?Q?caG2pii9k1Hg7aXYdZAkIHDQxzXgpRc3nAWH09fWTnR6wi+LplDPVtsPFx?=
+ =?iso-8859-1?Q?rFnnohK7dtH2UEqz3C9NI/yNXg42bOCoa8RqmIc2oSK3u9FGyvnUzWsI94?=
+ =?iso-8859-1?Q?xuMpqLi4htAdYIhflpuRFORtbxY8A6J7r5l+MY7fm46bn2PnPe1UAW1Zd/?=
+ =?iso-8859-1?Q?CnlyvnAsG4OeI8DfeM3MlQ+zPZ1WnnpCL93IlP7gVyRGAoGuhbdTlXpWYw?=
+ =?iso-8859-1?Q?SIKY1eTUtdUFRtS3BkbW+9YjPdVGRXZnAGA/0uo0uoEtYc/qCEJoflRbZW?=
+ =?iso-8859-1?Q?6/2rfwP4v4/k3jH2lBW8JK/vTP2IPVK/bPqrZ/YzvfVVfeYhap2S7grjbV?=
+ =?iso-8859-1?Q?U=3D?=
+MIME-Version: 1.0
+
+<html><head></head><body dir=ltr>
+
+<div>Ceding Policy No.: 069959938 00<br></div>
+
+<div>Broker Ref No.: <br></div>
+
+<div>TransRe Cert. No.: 910377014 - 2025<br></div>
+
+<div>Term: 08/11/2025 - 08/11/2026<br><br><div>
+
+<div>Kendall, <br><br></div>
+
+<div>The above captioned risk was bound subject to receipt of the following:<br><br>
+
+<ul>
+<li>Cede Policy  </li>
+</ul></div>
+
+<div>We would appreciate your expediting copies of the above mentioned documentation so that we may complete our underwriting file.<br><br></div>
+
+<div>Please e-mail to: PROFLIAB@transre.com<br><br></div>
+
+<div>Thank you in advance for your prompt attention to the above matter.<br><br></div>
+
+<div>Regards,<br><br></div>
+
+<img src=file://tirsfiles/grmrpts/Outfiles/prod/trc_printfax.bmp alt=Transre></body></html>
+

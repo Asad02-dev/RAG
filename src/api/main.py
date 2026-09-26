@@ -123,9 +123,11 @@ app = FastAPI(
 
 from src.api.routes import query as query_routes
 from src.api.routes import ingest as ingest_routes
+from src.api.routes import tirsweb as tirsweb_routes
 
 app.include_router(query_routes.router, prefix="/api", tags=["Query"])
 app.include_router(ingest_routes.router, prefix="/api", tags=["Documents"])
+app.include_router(tirsweb_routes.router, prefix="/api/tirsweb", tags=["TIRSWeb"])
 
 # ── Mount Web UI static files ──
 
@@ -154,6 +156,15 @@ async def serve_documents_page():
     if docs_path.exists():
         return FileResponse(str(docs_path))
     return {"message": "Documents page not found."}
+
+
+@app.get("/tirsweb", include_in_schema=False)
+async def serve_tirsweb_page():
+    """Serve the TIRSWeb UI page."""
+    tirsweb_path = WEB_DIR / "tirsweb" / "index.html"
+    if tirsweb_path.exists():
+        return FileResponse(str(tirsweb_path))
+    return {"message": "TIRSWeb page not found."}
 
 
 # ── API routes ──

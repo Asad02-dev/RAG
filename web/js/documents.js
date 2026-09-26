@@ -11,6 +11,7 @@ const uploadProgress = document.getElementById('upload-progress');
 const progressFill = document.getElementById('progress-fill');
 const progressText = document.getElementById('progress-text');
 const processBtn = document.getElementById('process-btn');
+const ingestBtn = document.getElementById('ingest-btn');
 const refreshBtn = document.getElementById('refresh-btn');
 const docsTbody = document.getElementById('docs-tbody');
 const deleteModal = document.getElementById('delete-modal');
@@ -126,6 +127,10 @@ async function uploadFiles(files) {
 // ── Buttons ──
 
 function setupButtons() {
+    ingestBtn?.addEventListener('click', () => {
+        fileInput.click();
+    });
+
     processBtn.addEventListener('click', async () => {
         processBtn.disabled = true;
         processBtn.textContent = '⏳ Processing...';
@@ -209,7 +214,11 @@ function renderDocumentsTable(documents) {
                 <td>${sizeStr}</td>
                 <td>${doc.chunk_count || '—'}</td>
                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td>
+                <td style="display: flex; gap: 8px;">
+                    ${!doc.ingested ? `
+                    <button class="index-btn action-btn secondary" style="padding: 4px 8px; font-size: 12px;" onclick="indexSingleDocument('${escapeHtml(doc.name)}')">
+                        ⚡ Index
+                    </button>` : ''}
                     <button class="delete-btn" onclick="showDeleteModal('${escapeHtml(doc.name)}')">
                         🗑️ Delete
                     </button>
@@ -218,6 +227,19 @@ function renderDocumentsTable(documents) {
         `;
     }).join('');
 }
+
+window.indexSingleDocument = async function(fileName) {
+    try {
+        const response = await fetch(`${API_BASE}/ingest/${encodeURIComponent(fileName)}`, {
+            method: 'POST',
+        });
+        if (!response.ok) throw new Error(`Failed to index ${fileName}`);
+        loadDocuments();
+        loadSidebarStats();
+    } catch (error) {
+        alert(error.message);
+    }
+};
 
 // ── Delete Modal ──
 

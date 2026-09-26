@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIRSWeb AI Underwriting Platform</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/tirsweb/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <span class="sparkle">✨</span> TIRSWeb AI
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" data-view="unassigned" class="active">Unassigned Queue</a></li>
+                <li><a href="#" data-view="assigned">Assigned Queue</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- View: Queues (Unassigned / Assigned) -->
+            <div id="queue-view" class="view active">
+                <header>
+                    <h1 id="queue-title">Unassigned Queue</h1>
+                    <div class="header-actions">
+                        <button class="btn primary">Refresh</button>
+                    </div>
+                </header>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th width="40"><input type="checkbox" id="selectAll"></th>
+                                <th width="120">Indicators</th>
+                                <th>Date/Time</th>
+                                <th>Department</th>
+                                <th>Category</th>
+                                <th>Subject</th>
+                                <th>Sender</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queue-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- View: Submission Detail -->
+            <div id="submission-view" class="view hidden">
+                <div class="submission-layout">
+                    <div class="submission-main">
+                        <header class="submission-header">
+                            <div class="header-left">
+                                <button id="back-btn" class="btn text-btn">← Back to Queue</button>
+                                <h1 id="sub-title">F-910411443 2026</h1>
+                            </div>
+                            <div class="header-actions">
+                                <button class="icon-btn" id="btn-email-panel" title="View Email">📧</button>
+                                <button class="icon-btn ai-icon-btn" id="btn-ai-panel"
+                                    title="AI Extraction Details">✨</button>
+                                <button id="btn-save" class="btn secondary">Save</button>
+                                <button id="btn-activities" class="btn secondary">Activities</button>
+                                <button id="btn-actions" class="btn secondary">Actions</button>
+                                <button id="btn-auto-quote" class="btn primary sparkle-btn">✨ Auto-Quote & Bind</button>
+                            </div>
+                        </header>
+
+                        <!-- Top level summary bar -->
+                        <div class="submission-summary-bar">
+                            <div class="summary-item">
+                                <span class="label">Insured Name</span>
+                                <span class="value">ETIHAD WATER & ELECTRICITY - MSFAH & DUQM CCGT</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Certificate Status</span>
+                                <span class="badge cleared">Cleared</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Effective Date</span>
+                                <span class="value">01/08/2026</span>
+                            </div>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="tabs-header">
+                            <button class="tab-btn">Clearance Report</button>
+                            <button class="tab-btn active">Submission Info *</button>
+                            <button class="tab-btn">Deal Info</button>
+                            <button class="tab-btn">Terms & Conditions</button>
+                            <button class="tab-btn">General</button>
+                            <button class="tab-btn">DMS</button>
+                        </div>
+
+                        <div class="tab-content active" id="tab-submission-info">
+                            <div class="submission-grid">
+
+                                <!-- Left Column -->
+                                <div class="form-column">
+                                    <div class="card form-section">
+                                        <h3>General Information</h3>
+                                        <div class="form-row"><label>Division</label>
+                                            <div class="input-wrap">Engineering</div>
+                                        </div>
+                                        <div class="form-row"><label>Department</label>
+                                            <div class="input-wrap">Engineering</div>
+                                        </div>
+                                        <div class="form-row"><label>Sub Department</label>
+                                            <div class="input-wrap">Engineering CAR (excluding ALOP / DSU) <span
+                                                    class="ai-badge" title="AI Inferred">✨</span></div>
+                                        </div>
+                                        <div class="form-row"><label>MGA</label>
+                                            <div class="input-wrap">-</div>
+                                        </div>
+                                        <div class="form-row"><label>Ceding Company <span class="req">*</span></label>
+                                            <div class="input-wrap">SUBMISSION MONITOR - UNIDENTIFIED <span
+                                                    class="ai-badge" title="AI Inferred">✨</span></div>
+                                        </div>
+                                        <div class="form-row"><label>Broker <span class="req">*</span></label>
+                                            <div class="input-wrap">MARSH LTD <span class="ai-badge"
+                                                    title="AI Populated">✨</span></div>
+                                        </div>
+                                        <div class="form-row"><label>Primary Contact <span class="req">*</span></label>
+                                            <div class="input-wrap">James Potter (james.potter01@guycarp.com) <span
+                                                    class="ai-badge" title="AI Populated">✨</span></div>
+                                        </div>
+                                        <div class="form-row"><label>Technical Assistant <span
+                                                    class="req">*</span></label>
+                                            <div class="input-wrap">Ringwood, John</div>
+                                        </div>
+                                        <div class="form-row"><label>Underwriter <span class="req">*</span></label>
+                                            <div class="input-wrap">Vonserlime, Rylkki</div>
+                                        </div>
+                                        <div class="form-row"><label>Reporting Office <span class="req">*</span></label>
+                                            <div class="input-wrap">London - TILL</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card form-section mt-4">
+                                        <h3>Dates & Status</h3>
+                                        <div class="form-row"><label>Underwriting Year <span
+                                                    class="req">*</span></label>
+                                            <div class="input-wrap">2026</div>
+                                        </div>
+                                        <div class="form-row"><label>Ceding Co. Eff Date <span
+                                                    class="req">*</span></label>
+                                            <div class="input-wrap">01/08/2026</div>
+                                        </div>
+                                        <div class="form-row"><label>Ceding Co. Exp Date <span
+                                                    class="req">*</span></label>
+                                            <div class="input-wrap">31/07/2027</div>
+                                        </div>
+                                        <div class="form-row"><label>Received Date <span class="req">*</span></label>
+                                            <div class="input-wrap">15/07/2026</div>
+                                        </div>
+                                        <div class="form-row"><label>Quote Date</label>
+                                            <div class="input-wrap">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="form-column">
+                                    <div class="card form-section">
+                                        <h3>Location & References</h3>
+                                        <div class="form-row"><label>Exposure Territory <span
+                                                    class="req">*</span></label>
+                                            <div class="input-wrap">OMAN <span class="ai-badge"
+                                                    title="AI Extracted">✨</span></div>
+                                        </div>
+                                        <div class="form-row"><label>Insured Home Country <span
+                                                    class="req">*</span></label>
+                                            <div class="input-wrap">OMAN</div>
+                                        </div>
+                                        <div class="form-row"><label>Location</label>
+                                            <div class="input-wrap">OMAN</div>
+                                        </div>
+                                        <div class="form-row"><label>NAICS</label>
+                                            <div class="input-wrap">-</div>
+                                        </div>
+                                        <div class="form-row"><label>Base Currency <span class="req">*</span></label>
+                                            <div class="input-wrap">USD</div>
+                                        </div>
+                                        <div class="form-row"><label>Submission Number</label>
+                                            <div class="input-wrap">1546766</div>
+                                        </div>
+                                        <div class="form-row"><label>Certificate Number</label>
+                                            <div class="input-wrap">910411443</div>
+                                        </div>
+                                        <div class="form-row"><label>TRC B2B Reference</label>
+                                            <div class="input-wrap">F4114432026</div>
+                                        </div>
+                                        <div class="form-row"><label>Treaty Key</label>
+                                            <div class="input-wrap">-</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card form-section mt-4">
+                                        <h3>TRC Dates</h3>
+                                        <div class="form-row"><label>TRC Effective Date <span
+                                                    class="req">*</span></label>
+                                            <div class="input-wrap">01/08/2026</div>
+                                        </div>
+                                        <div class="form-row"><label>TRC Expiration Date <span
+                                                    class="req">*</span></label>
+                                            <div class="input-wrap">31/07/2027</div>
+                                        </div>
+                                        <div class="form-row"><label>Legally Obliged Unincepted Business Date <span
+                                                    class="req">*</span></label>
+                                            <div class="input-wrap">31/07/2026</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Third Column for extra details like the screenshot -->
+                                <div class="form-column">
+                                    <div class="card form-section">
+                                        <h3>Coverage Details</h3>
+                                        <div class="form-row inline-radio">
+                                            <label><input type="radio" checked> PRO RATA</label>
+                                            <label><input type="radio"> XOL</label>
+                                        </div>
+                                        <div class="form-row inline-radio">
+                                            <label><input type="radio" checked> New</label>
+                                            <label><input type="radio"> Renewal</label>
+                                        </div>
+                                        <div class="form-row"><label>Company Domicile <span class="req">*</span></label>
+                                            <div class="input-wrap">WORLD WIDE</div>
+                                        </div>
+                                        <div class="form-row"><label>Forms <span class="req">*</span></label>
+                                            <div class="input-wrap">OCCURRENCE</div>
+                                        </div>
+                                        <div class="form-row"><label>Coverage</label>
+                                            <div class="input-wrap">Erection All Risks</div>
+                                        </div>
+                                        <div class="form-row"><label>Risk Group</label>
+                                            <div class="input-wrap">Perils</div>
+                                        </div>
+                                        <div class="form-row">
+                                            <label><input type="checkbox"> Facility</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div> <!-- End of submission-main -->
+                        </div> <!-- End of Layout -->
+                    </div> <!-- End of Submission view -->
+        </main>
+
+        <!-- Global Side Panel for Previews -->
+        <div id="side-panel-container" class="side-panel-container global-panel hidden">
+
+            <!-- Email Preview Panel -->
+            <div id="panel-email" class="panel-content hidden light-email-view">
+                <div class="email-header-top">
+                    <h3 class="email-subject-line">FW: end example one of mine...</h3>
+                    <div class="email-actions">
+                        <button class="btn-close-panel icon-btn" style="color: #666;">✕</button>
+                    </div>
+                </div>
+                <div class="email-meta-light">
+                    <div class="meta-row">
+                        <span class="meta-label">From:</span>
+                        <span class="meta-value email-from"></span>
+                        <span class="email-date"></span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">To:</span>
+                        <span class="meta-value email-to"></span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Cc:</span>
+                        <span class="meta-value email-cc"></span>
+                    </div>
+                </div>
+                <div class="email-attachments">
+                    <div class="attachment-badge">
+                        📄 <span class="att-name">Endoso 1 (TransRe) EMPRESA PORTUARIA...</span> ⬇
+                    </div>
+                </div>
+                <hr class="email-divider">
+                <div class="email-content">
+                    <!-- HTML content will be injected here -->
+                </div>
+            </div>
+
+            <!-- AI Preview Panel -->
+            <div id="panel-ai" class="panel-content hidden">
+                <div class="panel-header ai-panel-header">
+                    <h3>✨ AI Preview | Job ID: dsz...</h3>
+                    <div class="panel-actions">
+                        <button class="btn btn-sm secondary">Refresh</button>
+                        <button class="btn btn-sm secondary">Download</button>
+                        <button class="btn-close-panel icon-btn">✕</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <table class="ai-diff-table">
+                        <thead>
+                            <tr>
+                                <th>Field Name</th>
+                                <th>Confidence</th>
+                                <th>Extracted Value</th>
+                                <th>TIRS Value</th>
+                                <th>TA Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Insured Name</td>
+                                <td><span class="conf-badge high">100</span></td>
+                                <td>Shimmick Construct...</td>
+                                <td>SHIMMICK CONSTRU...</td>
+                                <td><input type="checkbox" checked></td>
+                            </tr>
+                            <tr>
+                                <td>Sub Department</td>
+                                <td><span class="conf-badge high">100</span></td>
+                                <td>Excess & Surplus Lin...</td>
+                                <td>Excess & Surplus Lin...</td>
+                                <td><input type="checkbox" checked></td>
+                            </tr>
+                            <tr>
+                                <td>Ceding Company Name</td>
+                                <td><span class="conf-badge high">100</span></td>
+                                <td>CNA</td>
+                                <td>CONTINENTAL INSU...</td>
+                                <td><input type="checkbox" checked></td>
+                            </tr>
+                            <tr>
+                                <td>Broker Company Name</td>
+                                <td><span class="conf-badge high">100</span></td>
+                                <td>Alliant Re A Division</td>
+                                <td>ALLIANT INSURANCE</td>
+                                <td><input type="checkbox" checked></td>
+                            </tr>
+                            <tr>
+                                <td>Exposure Territory</td>
+                                <td><span class="conf-badge high">100</span></td>
+                                <td>UNITED STATES</td>
+                                <td>UNITED STATES</td>
+                                <td><input type="checkbox"></td>
+                            </tr>
+                            <tr>
+                                <td>City</td>
+                                <td><span class="conf-badge high">100</span></td>
+                                <td>TACOMA</td>
+                                <td>TACOMA</td>
+                                <td><input type="checkbox"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="ai-meta-footer">
+                        <p>Action: Extract | Provider: CYTORA | Status: Completed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1-Page Summary Panel -->
+            <div id="panel-summary" class="panel-content hidden">
+                <div class="panel-header sum-panel-header">
+                    <h3>📄 1-Page AI Summary</h3>
+                    <button class="btn-close-panel icon-btn">✕</button>
+                </div>
+                <div class="panel-body">
+                    <div class="summary-card">
+                        <h4>Executive Summary</h4>
+                        <p>This is a <strong>New</strong> Erection All Risks (EAR) submission for <strong>ETIHAD WATER &
+                                ELECTRICITY - MSFAH & DUQM CCGT</strong> located in <strong>OMAN</strong>. The broker is
+                            MARSH LTD.</p>
+                        <hr class="my-3 border-light">
+                        <h4>Key Risk Factors</h4>
+                        <ul class="risk-list">
+                            <li><span class="conf-badge high">High</span> Natural Catastrophe Exposure (Wind)</li>
+                            <li><span class="conf-badge review">Medium</span> High limits requested on secondary
+                                coverages</li>
+                        </ul>
+                        <hr class="my-3 border-light">
+                        <h4>Underwriting Recommendation</h4>
+                        <p>Proceed with caution. The project is within appetite, but treaty limits must be closely
+                            monitored due to regional aggregation.</p>
+                        <button class="btn primary btn-sm mt-4">Generate Final Document</button>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- End of Side Panel Container -->
+    </div>
+
+    <!-- Hover Popover Template -->
+    <div id="ai-popover" class="glass-popover hidden">
+        <div class="popover-header">
+            <span class="pop-action">✨ AUTO_POPULATED</span>
+            <span class="pop-conf">🟢 <span id="pop-conf-val">99</span>%</span>
+        </div>
+        <div class="popover-body">
+            <p><strong>Why:</strong> <span id="pop-reason"></span></p>
+            <div class="grounding">
+                <p>📄 <span id="pop-source"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/tirsweb/app.js"></script>
+</body>
+
+</html>
