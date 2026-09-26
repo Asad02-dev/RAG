@@ -16,7 +16,8 @@ class Settings(BaseSettings):
     # ── Gemini API ──
     gemini_api_key: str = ""
     gemini_embed_model: str = "gemini-embedding-2"
-    gemini_llm_model: str = "gemma-4-26b-a4b-it"
+    gemini_llm_model: str = "gemma-4-26b-a4b-it" # Used for querying
+    gemini_extraction_model: str = "gemma-4-12b-a4b-it" # Faster parsing model
     gemini_llm_model_complex: str = "gemma-4-26b-a4b-it"
     gemini_llm_fallback_models: str = "gemma-4-12b-a4b-it,gemma-4-26b-a4b-it"
 

@@ -1,6 +1,222 @@
 {
   "submissions": [
     {
+      "id": "SUB-f80d9611",
+      "status": "ASSIGNED",
+      "clearance_status": "CLEARED",
+      "email": {
+        "subject": "FW: MK BR S.A (MONDIAL) - Renewal - Property - 26-27 - MDS RE - Submission # 1542493 - TRANS RE",
+        "from": "\"Velez, Stephanie\" <svelez@transre.com>",
+        "to": "\"LACPROPERTYFAC (TEAS)\" <LACPROPERTYFAC@transre.com>",
+        "cc": "",
+        "date": "Sat, 26 Sep 2026 00:10:48 +0000",
+        "filename": "FWMKBRSAMONDIALRenewalProperty2627MDSRESubmission154_LACPROPERTYFAC_153294.eml",
+        "body": "Indexed content from RAG pipeline."
+      },
+      "stitch_worksheet": {
+        "account_overview": {
+          "insured_name": "Extracted from RAG"
+        },
+        "deal_metrics": {},
+        "underwriting_evaluation": {
+          "assigned_ta": "Default TA (Auto)",
+          "assigned_uw": "Default UW (Auto)"
+        }
+      }
+    },
+    {
+      "id": "SUB-e0ccc883",
+      "status": "ASSIGNED",
+      "clearance_status": "CLEARED",
+      "email": {
+        "subject": "RV: ALUR (ALCOHOLES DEL URUGUAY) / TRO / BSE - RENOVACION  - G1428",
+        "from": "\"Trovato, Maria\" <mtrovato@transre.com>",
+        "to": "\"Velez, Stephanie\" <svelez@transre.com>, \"LACCASFAC_test (TEAS)\" <LACCASFAC_test@transre.com>",
+        "cc": "",
+        "date": "Tue, 22 Sep 2026 16:22:26 +0000",
+        "filename": "RVALURALCOHOLESDELURUGUAYTROBSERENOVACIONG1428_LACCASFAC_test_6793.eml",
+        "body": "Indexed content from RAG pipeline."
+      },
+      "stitch_worksheet": {
+        "account_overview": {
+          "insured_name": "Extracted from RAG"
+        },
+        "deal_metrics": {},
+        "underwriting_evaluation": {
+          "assigned_ta": "Default TA (Auto)",
+          "assigned_uw": "Default UW (Auto)"
+        }
+      }
+    },
+    {
+      "id": "SUB-2b91183c",
+      "status": "ASSIGNED",
+      "clearance_status": "CLEARED",
+      "email": {
+        "subject": "TPG INC.. TransRe Cert # 910300455 - Document Request Notification #910300455202511302025,DFU,EM Request/Cede Policy",
+        "from": "\"Oliha, Victoria\" <voliha@transre.com>",
+        "to": "profliab@transre.com",
+        "cc": "",
+        "date": "Fri, 25 Sep 2026 22:00:06 -0400",
+        "filename": "TPGINCTransReCert910300455DocumentRequestNotification910300455202_Profliability_153313.eml",
+        "body": "Indexed content from RAG pipeline."
+      },
+      "stitch_worksheet": {
+        "account_overview": {
+          "insured_name": "Extracted from RAG"
+        },
+        "deal_metrics": {},
+        "underwriting_evaluation": {
+          "assigned_ta": "Default TA (Auto)",
+          "assigned_uw": "Default UW (Auto)"
+        }
+      }
+    },
+    {
+      "id": "SUB-0eff2633",
+      "status": "ASSIGNED",
+      "clearance_status": "CLEARED",
+      "email": {
+        "subject": "SCRIPPS HEALTH INPATIENT PROVIDERS MEDICAL GROUP,. TransRe Cert # 910331633 - Document Request Notification #910331633202508012025,DFU,EM Request/Cede Policy",
+        "from": "\"Williams, Tonya\" <twilliams@transre.com>",
+        "to": "profliab@transre.com",
+        "cc": "",
+        "date": "Fri, 25 Sep 2026 22:00:02 -0400",
+        "filename": "SCRIPPSHEALTHINPATIENTPROVIDERSMEDICALGROUPTransReCert910331633Do_Profliability_153314.eml",
+        "body": "Indexed content from RAG pipeline."
+      },
+      "stitch_worksheet": {
+        "account_overview": {
+          "insured_name": "Extracted from RAG"
+        },
+        "deal_metrics": {},
+        "underwriting_evaluation": {
+          "assigned_ta": "Default TA (Auto)",
+          "assigned_uw": "Default UW (Auto)"
+        }
+      }
+    },
+    {
+      "id": "SUB-c84c8c61",
+      "status": "ASSIGNED",
+      "clearance_status": "CLEARED",
+      "email": {
+        "subject": "KIRKLAND & ELLIS LLP. TransRe Cert # 910286582 - Document Request Notification #910286582202601012026,DFU,EM Request/Cede Policy",
+        "from": "\"Oliha, Victoria\" <voliha@transre.com>",
+        "to": "profliab@transre.com",
+        "cc": "",
+        "date": "Fri, 25 Sep 2026 22:00:07 -0400",
+        "filename": "KIRKLANDELLISLLPTransReCert910286582DocumentRequestNotification_Profliability_153318.eml",
+        "body": "Indexed content from RAG pipeline."
+      },
+      "stitch_worksheet": {
+        "account_overview": {
+          "insured_name": "Extracted from RAG"
+        },
+        "deal_metrics": {},
+        "underwriting_evaluation": {
+          "assigned_ta": "Default TA (Auto)",
+          "assigned_uw": "Default UW (Auto)"
+        }
+      }
+    },
+    {
+      "id": "SUB-0a0ea72c",
+      "status": "ASSIGNED",
+      "clearance_status": "CLEARED",
+      "email": {
+        "subject": "KIRKLAND & ELLIS LLP. TransRe Cert # 910286287 - Document Request Notification #910286287202601012026,DFU,EM Request/Cede Policy",
+        "from": "\"Oliha, Victoria\" <voliha@transre.com>",
+        "to": "profliab@transre.com",
+        "cc": "",
+        "date": "Fri, 25 Sep 2026 22:00:07 -0400",
+        "filename": "KIRKLANDELLISLLPTransReCert910286287DocumentRequestNotification_Profliability_153310.eml",
+        "body": "Indexed content from RAG pipeline."
+      },
+      "stitch_worksheet": {
+        "account_overview": {
+          "insured_name": "Extracted from RAG"
+        },
+        "deal_metrics": {},
+        "underwriting_evaluation": {
+          "assigned_ta": "Default TA (Auto)",
+          "assigned_uw": "Default UW (Auto)"
+        }
+      }
+    },
+    {
+      "id": "SUB-1305c73e",
+      "status": "ASSIGNED",
+      "clearance_status": "CLEARED",
+      "email": {
+        "subject": "HALFF ASSOCIATES, INC. TransRe Cert # 910331988 - Document Request Notification #910331988202508012025,DFU,EM Request/Cede Policy",
+        "from": "\"Williams, Tonya\" <twilliams@transre.com>",
+        "to": "profliab@transre.com",
+        "cc": "",
+        "date": "Fri, 25 Sep 2026 22:00:02 -0400",
+        "filename": "HALFFASSOCIATESINCTransReCert910331988DocumentRequestNotification_Profliability_153320.eml",
+        "body": "Indexed content from RAG pipeline."
+      },
+      "stitch_worksheet": {
+        "account_overview": {
+          "insured_name": "Extracted from RAG"
+        },
+        "deal_metrics": {},
+        "underwriting_evaluation": {
+          "assigned_ta": "Default TA (Auto)",
+          "assigned_uw": "Default UW (Auto)"
+        }
+      }
+    },
+    {
+      "id": "SUB-8f650881",
+      "status": "ASSIGNED",
+      "clearance_status": "CLEARED",
+      "email": {
+        "subject": "FW: sub example 2 - FW: Emusa Oferta Facultativa Incendio 2026-2027 Incendio",
+        "from": "\"Velez, Stephanie\" <svelez@transre.com>",
+        "to": "\"LACPROPERTYFAC_test (TEAS)\" <LACPROPERTYFAC_test@transre.com>",
+        "cc": "",
+        "date": "Tue, 22 Sep 2026 14:32:49 +0000",
+        "filename": "FWsubexample2FWEmusaOfertaFacultativaIncendio20262027Incendio_LACPROPERTYFAC_test_6790.eml",
+        "body": "Indexed content from RAG pipeline."
+      },
+      "stitch_worksheet": {
+        "account_overview": {
+          "insured_name": "Extracted from RAG"
+        },
+        "deal_metrics": {},
+        "underwriting_evaluation": {
+          "assigned_ta": "Default TA (Auto)",
+          "assigned_uw": "Default UW (Auto)"
+        }
+      }
+    },
+    {
+      "id": "SUB-7337a6c1",
+      "status": "ASSIGNED",
+      "clearance_status": "CLEARED",
+      "email": {
+        "subject": "FW: sub example 2 - FW: Emusa Oferta Facultativa Incendio 2026-2027 Incendio",
+        "from": "\"Velez, Stephanie\" <svelez@transre.com>",
+        "to": "\"LACPROPERTYFAC_test (TEAS)\" <LACPROPERTYFAC_test@transre.com>",
+        "cc": "",
+        "date": "Tue, 22 Sep 2026 14:32:49 +0000",
+        "filename": "FWsubexample2FWEmusaOfertaFacultativaIncendio20262027Incendio_LACPROPERTYFAC_test_6790.eml",
+        "body": "Indexed content from RAG pipeline."
+      },
+      "stitch_worksheet": {
+        "account_overview": {
+          "insured_name": "Extracted from RAG"
+        },
+        "deal_metrics": {},
+        "underwriting_evaluation": {
+          "assigned_ta": "Default TA (Auto)",
+          "assigned_uw": "Default UW (Auto)"
+        }
+      }
+    },
+    {
       "id": "SUB-f42c2b06",
       "status": "ASSIGNED",
       "clearance_status": "CLEARED",
