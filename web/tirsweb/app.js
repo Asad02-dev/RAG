@@ -150,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 const payload = {
+                    submission_id: currentSubmission.id,
                     email_body: currentSubmission.email?.body || "No email body",
                     cytora_json: currentSubmission.cytora_entries || {},
                     field_names: fieldNames
@@ -368,30 +369,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 3. Update 1-Page Summary
                 const summaryBody = document.querySelector('#panel-summary .summary-card');
                 if (summaryBody && type === 'summary') {
-                    summaryBody.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">✨ Generating AI summary...</div>';
+                    
+                    const fetchSummary = (force = false) => {
+                        summaryBody.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">✨ ' + (force ? 'Re-generating' : 'Fetching') + ' AI summary...</div>';
 
-                    const payload = {
-                        email_body: currentSubmission.email?.body || "No email body provided.",
-                        cytora_json: currentSubmission.cytora_entries || {}
-                    };
+                        const payload = {
+                            submission_id: currentSubmission.id,
+                            email_body: currentSubmission.email?.body || "No email body provided.",
+                            cytora_json: currentSubmission.cytora_entries || {},
+                            force_regenerate: force
+                        };
 
-                    fetch('/api/tirsweb/summarize', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.summary_html) {
-                                summaryBody.innerHTML = data.summary_html;
-                            } else {
-                                summaryBody.innerHTML = '<div style="color: red; padding: 1rem;">Failed to generate summary.</div>';
-                            }
+                        fetch('/api/tirsweb/summarize', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
                         })
-                        .catch(err => {
-                            console.error('Summary generation error:', err);
-                            summaryBody.innerHTML = '<div style="color: red; padding: 1rem;">An error occurred while generating the summary.</div>';
-                        });
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.summary_html) {
+                                    summaryBody.innerHTML = `
+                                        ${data.summary_html}
+                                        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                                            <button class="btn primary btn-sm">Generate Final Document</button>
+                                            <button class="btn secondary btn-sm" id="btn-regen-summary">Regenerate Summary</button>
+                                        </div>
+                                    `;
+                                    
+                                    const regenBtn = summaryBody.querySelector('#btn-regen-summary');
+                                    if (regenBtn) {
+                                        regenBtn.addEventListener('click', () => fetchSummary(true));
+                                    }
+                                } else {
+                                    summaryBody.innerHTML = '<div style="color: red; padding: 1rem;">Failed to generate summary.</div><button class="btn secondary btn-sm" id="btn-regen-summary">Retry</button>';
+                                    summaryBody.querySelector('#btn-regen-summary')?.addEventListener('click', () => fetchSummary(true));
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Summary generation error:', err);
+                                summaryBody.innerHTML = '<div style="color: red; padding: 1rem;">An error occurred while generating the summary.</div><button class="btn secondary btn-sm" id="btn-regen-summary">Retry</button>';
+                                summaryBody.querySelector('#btn-regen-summary')?.addEventListener('click', () => fetchSummary(true));
+                            });
+                    };
+                    
+                    fetchSummary(false);
                 }
             }
         }
@@ -494,5 +515,91 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.style.borderColor = 'var(--success)';
         }, 1500);
     });
+
+    // Chatbot Logic
+    const chatbotToggleBtn = document.getElementById('chatbot-toggle-btn');
+    const chatbotPanel = document.getElementById('chatbot-panel');
+    const closeChatbotBtn = document.getElementById('close-chatbot-btn');
+    const chatbotInput = document.getElementById('chatbot-input');
+    const chatbotSendBtn = document.getElementById('chatbot-send-btn');
+    const chatbotMessages = document.getElementById('chatbot-messages');
+
+    if (chatbotToggleBtn) {
+        chatbotToggleBtn.addEventListener('click', () => {
+            chatbotPanel.classList.remove('hidden');
+        });
+    }
+
+    if (closeChatbotBtn) {
+        closeChatbotBtn.addEventListener('click', () => {
+            chatbotPanel.classList.add('hidden');
+        });
+    }
+
+    function appendMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `chat-msg ${sender}-msg`;
+        msgDiv.innerHTML = `<p>${text}</p>`;
+        chatbotMessages.appendChild(msgDiv);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    function sendMessage() {
+        const text = chatbotInput.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user');
+        chatbotInput.value = '';
+
+        // Generate context from current submission
+        let contextStr = "No active submission context.";
+        if (currentSubmission) {
+            contextStr = `Submission ID: ${currentSubmission.id}
+Email Body: ${currentSubmission.email?.body || 'None'}
+Extracted Data: ${JSON.stringify(currentSubmission.cytora_entries || {})}`;
+        }
+
+        const payload = {
+            message: text,
+            submission_context: contextStr
+        };
+
+        // Show typing indicator
+        const typingId = 'typing-' + Date.now();
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'chat-msg ai-msg';
+        typingDiv.id = typingId;
+        typingDiv.innerHTML = `<p>...</p>`;
+        chatbotMessages.appendChild(typingDiv);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+        fetch('/api/tirsweb/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById(typingId)?.remove();
+            appendMessage(data.reply, 'ai');
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById(typingId)?.remove();
+            appendMessage('Failed to connect to TA Assistant.', 'ai');
+        });
+    }
+
+    if (chatbotSendBtn) {
+        chatbotSendBtn.addEventListener('click', sendMessage);
+    }
+
+    if (chatbotInput) {
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
 
 });

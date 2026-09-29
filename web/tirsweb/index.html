@@ -410,6 +410,25 @@
         </div>
     </div>
 
+    <!-- TA Assistant Chatbot -->
+    <button id="chatbot-toggle-btn" class="chatbot-toggle-btn" title="Ask TA Assistant">💬</button>
+    
+    <div id="chatbot-panel" class="chatbot-panel hidden">
+        <div class="chatbot-header">
+            <h3>🤖 TA Assistant</h3>
+            <button id="close-chatbot-btn" class="icon-btn">✕</button>
+        </div>
+        <div id="chatbot-messages" class="chatbot-messages">
+            <div class="chat-msg ai-msg">
+                <p>Hi! I'm your TA Assistant. Ask me anything about this submission.</p>
+            </div>
+        </div>
+        <div class="chatbot-input-area">
+            <input type="text" id="chatbot-input" placeholder="Type a question..." />
+            <button id="chatbot-send-btn" class="btn primary btn-sm">Send</button>
+        </div>
+    </div>
+
     <script src="/static/tirsweb/app.js"></script>
 </body>
 
