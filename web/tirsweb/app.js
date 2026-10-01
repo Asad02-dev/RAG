@@ -281,6 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Side Panels Logic
     const btnEmailPanel = document.getElementById('btn-email-panel');
     const btnAiPanel = document.getElementById('btn-ai-panel');
+    const btnSummaryPanel = document.getElementById('btn-summary-panel');
     const sidePanelContainer = document.getElementById('side-panel-container');
     const panelEmail = document.getElementById('panel-email');
     const panelAi = document.getElementById('panel-ai');
@@ -442,6 +443,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (btnSummaryPanel) {
+        btnSummaryPanel.addEventListener('click', () => {
+            if (currentSubmission) {
+                window.openGlobalPanel('summary', currentSubmission.id);
+            } else {
+                openPanel(panelSummary);
+            }
+        });
+    }
+
     closeBtns.forEach(btn => {
         btn.addEventListener('click', closePanel);
     });
@@ -555,8 +566,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let contextStr = "No active submission context.";
         if (currentSubmission) {
             contextStr = `Submission ID: ${currentSubmission.id}
+Status: ${currentSubmission.status || 'Unknown'}
+Clearance Status: ${currentSubmission.clearance_status || 'Unknown'}
+Email Subject: ${currentSubmission.email?.subject || 'None'}
+Email From: ${currentSubmission.email?.from || 'None'}
 Email Body: ${currentSubmission.email?.body || 'None'}
-Extracted Data: ${JSON.stringify(currentSubmission.cytora_entries || {})}`;
+Stitch Worksheet Data: ${JSON.stringify(currentSubmission.stitch_worksheet || {})}
+Cytora Extracted Data: ${JSON.stringify(currentSubmission.cytora_entries || {})}`;
         }
 
         const payload = {

@@ -36,38 +36,76 @@ def generate_summary(request: SummarizeRequest):
         except Exception:
             pass # fallback to regenerate
 
-    client = genai.Client(api_key=settings.gemini_api_key or "dummy-api-key")
+    # Ensure we strictly use the Gemma model
+    llm_model = getattr(settings, 'gemini_llm_model', "gemma-4-26b-a4b-it")
+    
+    # Aggressively truncate to stay under the 16k token limit
+    email_text = str(request.email_body)[:10000]
+    cytora_text = str(request.cytora_json)[:5000]
+    
     prompt = f"""
-    You are an expert underwriter assistant. Generate a 1-page executive summary based on the following email and Cytora JSON extraction data.
-    Return ONLY valid HTML that can be injected into the UI (do not include markdown code block syntax like ```html). 
-    The HTML should follow this structure exactly:
-    <h4>Executive Summary</h4>
-    <p>[A brief paragraph summarizing the submission, the insured name, and line of business based on the data.]</p>
+    You are an expert Technical Assistant (TA) and Underwriter Assistant. Generate a comprehensive 1-page executive summary based on the following email and Cytora JSON extraction data. The Underwriter must be able to make a decision based purely on this summary without reading the original email.
+    
+    Return ONLY valid HTML that can be injected into the UI (do not include markdown code block syntax like ```html).
+    The HTML should follow this detailed structure exactly:
+    
+    <h4>Submission Overview</h4>
+    <p><strong>Insured Name:</strong> [Insured Name]</p>
+    <p><strong>Broker/Sender:</strong> [Broker Firm and Contact Name]</p>
+    <p><strong>Line of Business:</strong> [LOB]</p>
+    <p><strong>Effective Date:</strong> [Date]</p>
+    <p><strong>Intent/Action Required:</strong> [E.g., New Submission, Follow-up, Missing Information]</p>
+    
+    <hr class="my-3 border-light">
+    <h4>Email Summary & Context</h4>
+    <p>[A detailed, multi-paragraph summary of the email's content, capturing all nuances, broker requests, referenced attached documents, and missing information. Do not leave out any operational details.]</p>
+    
+    <hr class="my-3 border-light">
+    <h4>Key Extraction Details</h4>
+    <ul>
+        <li><strong>Limits Requested:</strong> [Limits]</li>
+        <li><strong>Deductibles/Attachments:</strong> [Deductibles]</li>
+        <li><strong>Revenues/TIV:</strong> [Revenues/TIV]</li>
+    </ul>
+
     <hr class="my-3 border-light">
     <h4>Key Risk Factors</h4>
     <ul class="risk-list">
-        <li><span class="conf-badge high">High</span> [Risk 1]</li>
-        <li><span class="conf-badge review">Medium</span> [Risk 2]</li>
+        <li><span class="conf-badge high">High</span> [Detailed Risk 1]</li>
+        <li><span class="conf-badge review">Review Needed</span> [Detailed Risk 2]</li>
     </ul>
+    
     <hr class="my-3 border-light">
     <h4>Underwriting Recommendation</h4>
-    <p>[A paragraph with recommendations based on the risk profile.]</p>
+    <p>[A thorough paragraph with explicit recommendations to the Underwriter (e.g., Proceed to Quote, Decline, Request More Info), based on the risk profile and appetite guidelines.]</p>
 
     Email Body:
-    {request.email_body}
+    {email_text}
 
     Cytora Extraction:
-    {request.cytora_json}
+    {cytora_text}
     """
     
-    # Use fallback if setting not available
-    llm_model = getattr(settings, 'gemini_llm_model', "gemini-1.5-pro")
+    client = genai.Client(api_key=settings.gemini_api_key or "dummy-api-key")
     
-    response = client.models.generate_content(
-        model=llm_model,
-        contents=prompt,
-        config=types.GenerateContentConfig(temperature=0.2)
-    )
+    models_to_try = [llm_model] + getattr(settings, 'fallback_models_list', [])
+    response = None
+    last_err = None
+    for m in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=m,
+                contents=prompt,
+                config=types.GenerateContentConfig(temperature=0.2)
+            )
+            break
+        except Exception as e:
+            last_err = e
+            continue
+            
+    if not response:
+        raise last_err
+    
     
     html = response.text
     if html.startswith("```html"):
@@ -140,6 +178,9 @@ def extract_fields(request: ExtractFieldsRequest):
     llm_fields = {}
     if remaining_fields:
         client = genai.Client(api_key=settings.gemini_api_key or "dummy-api-key")
+        
+        email_text = str(request.email_body)[:15000] # Aggressively truncate
+        
         prompt = f"""
         You are an expert AI underwriting assistant. Extract the exact values for the requested fields based on the provided email.
         If a field's value cannot be found, output "-" for that field. Do not make up information.
@@ -151,23 +192,30 @@ def extract_fields(request: ExtractFieldsRequest):
         - "confidence": an integer from 0 to 100 representing confidence
         
         Email Body:
-        {request.email_body}
+        {email_text}
         
         Requested Fields:
         {remaining_fields}
         """
         
-        llm_model = getattr(settings, 'gemini_llm_model', "gemini-1.5-pro")
+        llm_model = getattr(settings, 'gemini_llm_model', "gemma-4-26b-a4b-it")
         
-        response = client.models.generate_content(
-            model=llm_model,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=0.1,
-                max_output_tokens=4096,
-                response_mime_type="application/json",
-            )
-        )
+        models_to_try = [llm_model] + getattr(settings, 'fallback_models_list', [])
+        response = None
+        for m in models_to_try:
+            try:
+                response = client.models.generate_content(
+                    model=m,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        temperature=0.1,
+                        max_output_tokens=4096,
+                        response_mime_type="application/json",
+                    )
+                )
+                break
+            except Exception:
+                continue
         
         try:
             data = json.loads(response.text)
@@ -203,27 +251,38 @@ def handle_chat(request: ChatRequest):
     settings = get_settings()
     client = genai.Client(api_key=settings.gemini_api_key or "dummy-api-key")
     
+    import re
+    
+    # Clean up the context to avoid 500 errors from massive HTML/Base64 payloads
+    clean_context = re.sub(r'<[^>]+>', ' ', request.submission_context) # strip HTML tags
+    clean_context = clean_context[:15000] # Truncate heavily for Gemma 16k limit
+
     prompt = f"""
     You are a Technical Assistant (TA) Underwriting Chatbot. Answer the user's question concisely based on the following submission context.
     If you don't know the answer based on the context, say so.
     
     Submission Context:
-    {request.submission_context}
+    {clean_context}
     
     User Question:
     {request.message}
     """
     
-    llm_model = getattr(settings, 'gemini_llm_model', "gemini-1.5-pro")
+    llm_model = getattr(settings, 'gemini_llm_model', "gemma-4-26b-a4b-it")
     
-    try:
-        response = client.models.generate_content(
-            model=llm_model,
-            contents=prompt,
-            config=types.GenerateContentConfig(temperature=0.3)
-        )
-        reply = response.text
-    except Exception as e:
-        reply = f"Sorry, I encountered an error: {str(e)}"
+    models_to_try = [llm_model] + getattr(settings, 'fallback_models_list', [])
+    reply = "Sorry, I encountered an error: All models failed."
+    for m in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=m,
+                contents=prompt,
+                config=types.GenerateContentConfig(temperature=0.3)
+            )
+            reply = response.text
+            break
+        except Exception as e:
+            reply = f"Sorry, I encountered an error: {str(e)}"
+            continue
         
     return ChatResponse(reply=reply)

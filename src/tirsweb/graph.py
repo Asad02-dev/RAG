@@ -1,6 +1,7 @@
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 from src.tirsweb.state import UnderwritingState
+import configs.constants as const
 
 from src.tirsweb.clearance import build_clearance_query, MockElasticSearchClient, evaluate_clearance
 from src.tirsweb.quote import check_appetite, compute_layer_pricing, generate_quote_letter
@@ -24,13 +25,13 @@ def email_ingestion_node(state: UnderwritingState) -> UnderwritingState:
     subject = email_raw.get("subject", "").lower()
     
     if "follow up" in subject or "fwd" in subject:
-        email_category = "FOLLOW_UP"
-        assigned_queue = "Assigned_TA_Queue"
-        ta_actions_pending = ["ACTION_ATTACH_UPDATE_DMS"]
+        email_category = const.EmailCategory.FOLLOW_UP
+        assigned_queue = const.TaskQueue.ASSIGNED_TA
+        ta_actions_pending = [const.TaskAction.ATTACH_UPDATE_DMS]
     else:
-        email_category = "SUBMISSION"
-        assigned_queue = "UW_Queue_1"
-        ta_actions_pending = ["ACTION_CLEARANCE_RESOLVE", "ACTION_CREATE_SUBMISSION"]
+        email_category = const.EmailCategory.SUBMISSION
+        assigned_queue = const.TaskQueue.UW_QUEUE_1
+        ta_actions_pending = [const.TaskAction.CLEARANCE_RESOLVE, const.TaskAction.CREATE_SUBMISSION]
 
     audit_trail = state.get("audit_trail", [])
     audit_trail.append(f"email_ingestion_node completed. Category: {email_category}")
@@ -45,13 +46,13 @@ def email_ingestion_node(state: UnderwritingState) -> UnderwritingState:
 
 def clearance_es_node(state: UnderwritingState) -> UnderwritingState:
     print("Executing: clearance_es_node")
-    cytora_json = state.get("cytora_json", {"insured_name": "Acme Logistics LLC", "tax_id": "12-3456789"})
-    email_raw = state.get("email_raw", {"domain": "acmelogistics.com"})
+    cytora_json = state.get("cytora_json", {"insured_name": const.MOCK_INSURED_NAME, "tax_id": const.MOCK_TAX_ID})
+    email_raw = state.get("email_raw", {"domain": const.MOCK_DOMAIN})
     
     query = build_clearance_query(cytora_json, email_raw)
     es_response = es_client.search(index="clearance", body=query)
     
-    current_broker = "Aon" # Mocked from email/cytora
+    current_broker = const.MOCK_BROKER_FIRM # Mocked from email/cytora
     result = evaluate_clearance(es_response, current_broker)
     
     audit_trail = state.get("audit_trail", [])
@@ -79,7 +80,7 @@ def multimodal_extractor_node(state: UnderwritingState) -> UnderwritingState:
 
 def company_enrichment_node(state: UnderwritingState) -> UnderwritingState:
     print("Executing: company_enrichment_node")
-    cytora_json = state.get("cytora_json", {"insured_name": "Acme Logistics LLC"})
+    cytora_json = state.get("cytora_json", {"insured_name": const.MOCK_INSURED_NAME})
     insured_name = cytora_json.get("insured_name", "Unknown")
     
     research = enrich_company_data(insured_name, {"city": "Chicago"})
@@ -113,7 +114,7 @@ def tirsweb_ui_executor_node(state: UnderwritingState) -> UnderwritingState:
     print("Executing: tirsweb_ui_executor_node")
     completed_actions = state.get("ta_actions_completed", [])
     
-    submission_key = state.get("tirs_submission_key", "SUB-UNKNOWN")
+    submission_key = state.get("tirs_submission_key", const.MOCK_SUBMISSION_KEY)
     stitch_worksheet = state.get("stitch_worksheet", {})
     clearance_status = state.get("clearance_status", "")
     quote_layers = state.get("quote_layers", [])
@@ -137,7 +138,7 @@ def tirsweb_ui_executor_node(state: UnderwritingState) -> UnderwritingState:
 def underwriting_rag_node(state: UnderwritingState) -> UnderwritingState:
     print("Executing: underwriting_rag_node")
     stitch_worksheet = state.get("stitch_worksheet", {})
-    lob = stitch_worksheet.get("deal_metrics", {}).get("line_of_business", "Commercial")
+    lob = stitch_worksheet.get("deal_metrics", {}).get("line_of_business", const.MOCK_LOB_COMMERCIAL)
     
     appetite_fit = chroma_client.query_appetite(lob)
     
@@ -155,13 +156,13 @@ def auto_quote_engine_node(state: UnderwritingState) -> UnderwritingState:
     deal_metrics = stitch_worksheet.get("deal_metrics", {"total_insurable_value": 75000000.0})
     
     # Mock underwriting guidelines check
-    appetite_rules = {"max_tiv": 100000000.0, "max_loss_ratio": 35.0}
+    appetite_rules = {"max_tiv": const.MOCK_APPETITE_MAX_TIV, "max_loss_ratio": const.MOCK_APPETITE_MAX_LOSS_RATIO}
     is_in_appetite = check_appetite(stitch_worksheet, appetite_rules)
     
     if not is_in_appetite:
         return {
             "auto_quote_approved": False,
-            "assigned_queue": "Pending Authorization",
+            "assigned_queue": const.TaskQueue.PENDING_AUTHORIZATION,
             "audit_trail": state.get("audit_trail", []) + ["auto_quote_engine_node: Declined (Out of Appetite). Routed to Pending Authorization"]
         }
     
@@ -170,7 +171,7 @@ def auto_quote_engine_node(state: UnderwritingState) -> UnderwritingState:
     
     layer = compute_layer_pricing(limit=limit, attachment=attachment, base_rate=0.0185, hazard_factor=1.0)
     layer["uw_assist_reasoning"] = "Auto-adjusted based on risk factors, TIRSWeb RAG database guidelines, and Stitch Analysis sheet."
-    letter = generate_quote_letter(insured_name="Acme Logistics LLC", broker_firm="Aon", layers=[layer])
+    letter = generate_quote_letter(insured_name=const.MOCK_INSURED_NAME, broker_firm=const.MOCK_BROKER_FIRM, layers=[layer])
     
     audit_trail = state.get("audit_trail", [])
     audit_trail.append("auto_quote_engine_node completed successfully")
@@ -179,7 +180,7 @@ def auto_quote_engine_node(state: UnderwritingState) -> UnderwritingState:
         "quote_layers": [layer],
         "quote_letter_content": letter,
         "auto_quote_approved": True,
-        "assigned_queue": "Pending Authorization",
+        "assigned_queue": const.TaskQueue.PENDING_AUTHORIZATION,
         "audit_trail": audit_trail
     }
 
@@ -196,7 +197,7 @@ def auto_dms_node(state: UnderwritingState) -> UnderwritingState:
 
 def route_after_ingestion(state: UnderwritingState) -> str:
     print("Evaluating: route_after_ingestion")
-    if state.get("email_category") == "FOLLOW_UP":
+    if state.get("email_category") == const.EmailCategory.FOLLOW_UP:
         return "auto_dms_node"
     return "clearance_es_node"
 
@@ -212,7 +213,7 @@ def clearance_gate(state: UnderwritingState) -> str:
 def quote_gate(state: UnderwritingState) -> str:
     print("Evaluating: quote_gate")
     appetite_fit = state.get("underwriting_appetite_fit", {}).get("appetite_fit", "")
-    if appetite_fit == "STRONG_FIT":
+    if appetite_fit == const.AppetiteFit.STRONG_FIT:
         return "auto_quote_engine_node"
     else:
         return "uw_referral_interrupt"

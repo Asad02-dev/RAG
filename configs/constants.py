@@ -1,0 +1,39 @@
+from enum import Enum
+
+class ModelProvider(str, Enum):
+    GEMINI = "gemini"
+    OPENAI = "openai"
+
+class EmailCategory(str, Enum):
+    FOLLOW_UP = "FOLLOW_UP"
+    SUBMISSION = "SUBMISSION"
+
+class TaskQueue(str, Enum):
+    ASSIGNED_TA = "Assigned_TA_Queue"
+    UW_QUEUE_1 = "UW_Queue_1"
+    PENDING_AUTHORIZATION = "Pending Authorization"
+
+class TaskAction(str, Enum):
+    ATTACH_UPDATE_DMS = "ACTION_ATTACH_UPDATE_DMS"
+    CLEARANCE_RESOLVE = "ACTION_CLEARANCE_RESOLVE"
+    CREATE_SUBMISSION = "ACTION_CREATE_SUBMISSION"
+
+class AppetiteFit(str, Enum):
+    STRONG_FIT = "STRONG_FIT"
+
+# Mock Data Constants
+MOCK_COMPANY_MARKET_CAP_USD = 420000000.0
+MOCK_COMPANY_EMPLOYEE_COUNT = 1850
+MOCK_COMPANY_SANCTIONS_CLEARED = True
+MOCK_COMPANY_LEGAL_STANDING = "ACTIVE"
+
+MOCK_APPETITE_MAX_TIV = 100000000.0
+MOCK_APPETITE_MAX_LOSS_RATIO = 35.0
+MOCK_APPETITE_MIN_RATE_ON_LINE = 0.015
+
+MOCK_INSURED_NAME = "Acme Logistics LLC"
+MOCK_TAX_ID = "12-3456789"
+MOCK_DOMAIN = "acmelogistics.com"
+MOCK_BROKER_FIRM = "Aon"
+MOCK_SUBMISSION_KEY = "SUB-UNKNOWN"
+MOCK_LOB_COMMERCIAL = "Commercial"

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from configs.constants import ModelProvider
 
 
 class Settings(BaseSettings):
@@ -13,6 +14,9 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    # ── Active Model Provider ──
+    active_model_provider: ModelProvider = ModelProvider.GEMINI
+
     # ── Gemini API ──
     gemini_api_key: str = ""
     gemini_embed_model: str = "gemini-embedding-2"
@@ -21,13 +25,51 @@ class Settings(BaseSettings):
     gemini_llm_model_complex: str = "gemma-4-26b-a4b-it"
     gemini_llm_fallback_models: str = "gemma-4-12b-a4b-it,gemma-4-26b-a4b-it"
 
+    # ── OpenAI API ──
+    openai_api_key: str = ""
+    openai_embed_model: str = "text-embedding-3-small"
+    openai_llm_model: str = "gpt-4o-mini"
+    openai_extraction_model: str = "gpt-4o-mini"
+    openai_llm_model_complex: str = "gpt-4o-mini"
+    openai_llm_fallback_models: str = "gpt-4o-mini"
+
     @property
     def fallback_models_list(self) -> list[str]:
-        """Return up to 3 fallback models as a list of strings."""
-        if not self.gemini_llm_fallback_models:
+        """Return up to 3 fallback models as a list of strings depending on active provider."""
+        fallback_models_str = (
+            self.openai_llm_fallback_models 
+            if self.active_model_provider == ModelProvider.OPENAI 
+            else self.gemini_llm_fallback_models
+        )
+        if not fallback_models_str:
             return []
-        models = [m.strip() for m in self.gemini_llm_fallback_models.split(",") if m.strip()]
+        models = [m.strip() for m in fallback_models_str.split(",") if m.strip()]
         return models[:3]
+
+    @property
+    def get_llm_model(self) -> str:
+        if self.active_model_provider == ModelProvider.OPENAI:
+            return self.openai_llm_model
+        return self.gemini_llm_model
+
+    @property
+    def get_embed_model(self) -> str:
+        if self.active_model_provider == ModelProvider.OPENAI:
+            return self.openai_embed_model
+        return self.gemini_embed_model
+
+    @property
+    def get_extraction_model(self) -> str:
+        if self.active_model_provider == ModelProvider.OPENAI:
+            return self.openai_extraction_model
+        return self.gemini_extraction_model
+
+    @property
+    def get_api_key(self) -> str:
+        if self.active_model_provider == ModelProvider.OPENAI:
+            return self.openai_api_key
+        return self.gemini_api_key
+
 
     # ── Paths ──
     documents_dir: str = "./data/documents"
