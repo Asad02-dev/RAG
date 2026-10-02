@@ -547,20 +547,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function appendMessage(text, sender) {
-        const msgDiv = document.createElement('div');
-        msgDiv.className = `chat-msg ${sender}-msg`;
-        msgDiv.innerHTML = `<p>${text}</p>`;
-        chatbotMessages.appendChild(msgDiv);
-        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-    }
-
-    function sendMessage() {
-        const text = chatbotInput.value.trim();
+    function handleSendChatMessage(inputEl, messagesEl) {
+        if (!inputEl || !messagesEl) return;
+        const text = inputEl.value.trim();
         if (!text) return;
 
-        appendMessage(text, 'user');
-        chatbotInput.value = '';
+        const appendMsg = (txt, sender) => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-msg ${sender}-msg`;
+            msgDiv.innerHTML = `<p>${txt}</p>`;
+            messagesEl.appendChild(msgDiv);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        };
+
+        appendMsg(text, 'user');
+        inputEl.value = '';
 
         // Generate context from current submission
         let contextStr = "No active submission context.";
@@ -581,13 +582,13 @@ Cytora Extracted Data: ${JSON.stringify(currentSubmission.cytora_entries || {})}
         };
 
         // Show typing indicator
-        const typingId = 'typing-' + Date.now();
+        const typingId = 'typing-' + Date.now() + Math.floor(Math.random()*1000);
         const typingDiv = document.createElement('div');
         typingDiv.className = 'chat-msg ai-msg';
         typingDiv.id = typingId;
         typingDiv.innerHTML = `<p>...</p>`;
-        chatbotMessages.appendChild(typingDiv);
-        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        messagesEl.appendChild(typingDiv);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
 
         fetch('/api/tirsweb/chat', {
             method: 'POST',
@@ -597,23 +598,40 @@ Cytora Extracted Data: ${JSON.stringify(currentSubmission.cytora_entries || {})}
         .then(res => res.json())
         .then(data => {
             document.getElementById(typingId)?.remove();
-            appendMessage(data.reply, 'ai');
+            appendMsg(data.reply, 'ai');
         })
         .catch(err => {
             console.error(err);
             document.getElementById(typingId)?.remove();
-            appendMessage('Failed to connect to TA Assistant.', 'ai');
+            appendMsg('Failed to connect to TA Assistant.', 'ai');
         });
     }
 
     if (chatbotSendBtn) {
-        chatbotSendBtn.addEventListener('click', sendMessage);
+        chatbotSendBtn.addEventListener('click', () => handleSendChatMessage(chatbotInput, chatbotMessages));
     }
 
     if (chatbotInput) {
         chatbotInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                sendMessage();
+                handleSendChatMessage(chatbotInput, chatbotMessages);
+            }
+        });
+    }
+
+    // Inline Summary Chatbot Logic
+    const summaryChatInput = document.getElementById('summary-chat-input');
+    const summaryChatSendBtn = document.getElementById('summary-chat-send-btn');
+    const summaryChatMessages = document.getElementById('summary-chat-messages');
+
+    if (summaryChatSendBtn) {
+        summaryChatSendBtn.addEventListener('click', () => handleSendChatMessage(summaryChatInput, summaryChatMessages));
+    }
+
+    if (summaryChatInput) {
+        summaryChatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSendChatMessage(summaryChatInput, summaryChatMessages);
             }
         });
     }

@@ -391,6 +391,22 @@
                             monitored due to regional aggregation.</p>
                         <button class="btn primary btn-sm mt-4">Generate Final Document</button>
                     </div>
+
+                    <!-- Inline Summary Chatbox -->
+                    <div id="summary-chat-container" class="mt-4" style="border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column;">
+                        <div class="chatbot-header" style="border-radius: 0; border-bottom: 1px solid var(--border);">
+                            <h3>🤖 Ask about this Submission</h3>
+                        </div>
+                        <div id="summary-chat-messages" class="chatbot-messages" style="height: 250px; background: white; border-radius: 0;">
+                            <div class="chat-msg ai-msg">
+                                <p>Hi! Ask me anything about this submission or the summary above.</p>
+                            </div>
+                        </div>
+                        <div class="chatbot-input-area" style="border-radius: 0; border-top: 1px solid var(--border);">
+                            <input type="text" id="summary-chat-input" placeholder="Type a question..." style="border-radius: 4px;" />
+                            <button id="summary-chat-send-btn" class="btn primary btn-sm">Send</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
