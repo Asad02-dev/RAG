@@ -14,8 +14,8 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # ── Active Model Provider ──
-    active_model_provider: ModelProvider = ModelProvider.GEMINI
+    # ── Active Model Provider ("openai" or "gemini") ──
+    active_model_provider: ModelProvider = ModelProvider.OPENAI
 
     # ── Gemini API ──
     gemini_api_key: str = ""

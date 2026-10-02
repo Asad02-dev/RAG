@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "RAG POC — Gemini-powered document intelligence & retrieval system"
 requires-python = ">=3.11"
 dependencies = [
-    # Gemini API (embeddings + LLM)
+    # LLM providers (embeddings + LLM); ACTIVE_MODEL_PROVIDER picks one, default openai
+    "openai>=1.66.0",
     "google-genai>=1.0.0",
 
     # Document Processing

@@ -10,6 +10,7 @@ from rich.prompt import Prompt
 from rich.table import Table
 
 from configs.settings import get_settings
+from src.llm_client import get_llm_client
 from src.ingestion.file_manager import FileManager
 from src.ingestion.document_processor import DocumentProcessor
 from src.ingestion.chunker import Chunker
@@ -38,9 +39,10 @@ def create_components():
         max_tokens=settings.max_chunk_tokens,
         overlap_tokens=settings.chunk_overlap_tokens,
     )
+    llm_client = get_llm_client(settings)
     embedder = Embedder(
-        api_key=settings.gemini_api_key,
-        model=settings.gemini_embed_model,
+        llm_client=llm_client,
+        model=settings.get_embed_model,
     )
     indexer = Indexer(settings.chroma_db_dir)
 
@@ -55,8 +57,8 @@ def create_components():
     search_client = SearchClient(embedder=embedder, indexer=indexer)
     query_engine = QueryEngine(
         search_client=search_client,
-        api_key=settings.gemini_api_key,
-        llm_model=settings.gemini_llm_model,
+        llm_client=llm_client,
+        llm_model=settings.get_llm_model,
         fallback_models=settings.fallback_models_list,
         temperature=settings.temperature,
         max_output_tokens=settings.max_output_tokens,
@@ -79,8 +81,9 @@ def show_status(file_manager: FileManager, indexer: Indexer, settings):
     table.add_row("Ingested", str(fm_stats["ingested_files"]))
     table.add_row("Pending", str(fm_stats["pending_files"]))
     table.add_row("Total Chunks", str(idx_stats["total_chunks"]))
-    table.add_row("LLM Model", settings.gemini_llm_model)
-    table.add_row("Embed Model", settings.gemini_embed_model)
+    table.add_row("Provider", settings.active_model_provider.value)
+    table.add_row("LLM Model", settings.get_llm_model)
+    table.add_row("Embed Model", settings.get_embed_model)
     table.add_row("Documents Dir", str(settings.documents_path))
 
     console.print(table)
@@ -91,7 +94,7 @@ def main():
     console.print(
         Panel.fit(
             "[bold white]🔍 RAG System POC[/bold white]\n"
-            "[dim]Gemini-Powered Document Intelligence & Retrieval[/dim]",
+            "[dim]LLM-Powered Document Intelligence & Retrieval[/dim]",
             border_style="bright_blue",
         )
     )
@@ -100,7 +103,7 @@ def main():
         file_manager, pipeline, query_engine, indexer, settings = create_components()
     except Exception as e:
         console.print(f"[red]❌ Initialization failed: {e}[/red]")
-        console.print("[dim]Make sure you have a valid .env file with GEMINI_API_KEY set.[/dim]")
+        console.print("[dim]Make sure you have a valid .env file with OPENAI_API_KEY (or GEMINI_API_KEY) set.[/dim]")
         sys.exit(1)
 
     console.print()

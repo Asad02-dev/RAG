@@ -1,6 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     let appData = null;
     let currentSubmission = null;
+    let chatSubmissionId = null;
+
+    // Each chat is scoped to one submission: when a different one is opened,
+    // drop the old conversation and keep only the greeting message.
+    function resetChatsIfSubmissionChanged() {
+        const id = currentSubmission ? currentSubmission.id : null;
+        if (id === chatSubmissionId) return;
+        chatSubmissionId = id;
+        ['chatbot-messages', 'summary-chat-messages'].forEach(elId => {
+            const el = document.getElementById(elId);
+            if (!el) return;
+            while (el.children.length > 1) el.removeChild(el.lastElementChild);
+        });
+    }
 
     // Elements
     const navLinks = document.querySelectorAll('.nav-links a');
@@ -95,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openSubmission = (id) => {
         currentSubmission = appData.submissions.find(s => s.id === id);
         if (!currentSubmission) return;
+        resetChatsIfSubmissionChanged();
 
         document.getElementById('sub-title').textContent = `F-910411443 2026`; // Hardcoded for mockup
 
@@ -304,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openGlobalPanel = (type, id) => {
         if (id) {
             currentSubmission = appData.submissions.find(s => s.id === id);
+            resetChatsIfSubmissionChanged();
             if (currentSubmission) {
 
                 // 1. Update Email Panel
@@ -552,43 +568,59 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = inputEl.value.trim();
         if (!text) return;
 
-        const appendMsg = (txt, sender) => {
+        const scrollToBottom = () => { messagesEl.scrollTop = messagesEl.scrollHeight; };
+
+        const appendMsg = (txt, sender, sources) => {
             const msgDiv = document.createElement('div');
             msgDiv.className = `chat-msg ${sender}-msg`;
-            msgDiv.innerHTML = `<p>${txt}</p>`;
+            const body = document.createElement('div');
+            body.className = 'chat-text';
+            // User text is shown as-is; AI replies get light Markdown formatting (escaped first)
+            if (sender === 'ai') body.innerHTML = renderChatMarkdown(txt);
+            else body.textContent = txt;
+            msgDiv.appendChild(body);
+
+            if (sources && sources.length) {
+                const srcWrap = document.createElement('div');
+                srcWrap.className = 'chat-sources';
+                const seen = new Set();
+                sources.forEach(s => {
+                    const label = `${s.file_name} · p.${s.page_number}`;
+                    if (seen.has(label)) return;
+                    seen.add(label);
+                    const chip = document.createElement('span');
+                    chip.className = 'chat-source-chip';
+                    chip.textContent = label;
+                    chip.title = s.section_heading ? `${label}\n${s.section_heading}` : label;
+                    srcWrap.appendChild(chip);
+                });
+                msgDiv.appendChild(srcWrap);
+            }
+
             messagesEl.appendChild(msgDiv);
-            messagesEl.scrollTop = messagesEl.scrollHeight;
+            scrollToBottom();
+            return msgDiv;
         };
 
         appendMsg(text, 'user');
         inputEl.value = '';
 
-        // Generate context from current submission
-        let contextStr = "No active submission context.";
-        if (currentSubmission) {
-            contextStr = `Submission ID: ${currentSubmission.id}
-Status: ${currentSubmission.status || 'Unknown'}
-Clearance Status: ${currentSubmission.clearance_status || 'Unknown'}
-Email Subject: ${currentSubmission.email?.subject || 'None'}
-Email From: ${currentSubmission.email?.from || 'None'}
-Email Body: ${currentSubmission.email?.body || 'None'}
-Stitch Worksheet Data: ${JSON.stringify(currentSubmission.stitch_worksheet || {})}
-Cytora Extracted Data: ${JSON.stringify(currentSubmission.cytora_entries || {})}`;
-        }
-
+        // The server builds the context (summary, data.json entry, this email's chunks) from the submission ID
         const payload = {
             message: text,
-            submission_context: contextStr
+            submission_id: currentSubmission ? currentSubmission.id : null
         };
 
-        // Show typing indicator
-        const typingId = 'typing-' + Date.now() + Math.floor(Math.random()*1000);
+        // Typing bubble while the answer is generated
         const typingDiv = document.createElement('div');
-        typingDiv.className = 'chat-msg ai-msg';
-        typingDiv.id = typingId;
-        typingDiv.innerHTML = `<p>...</p>`;
+        typingDiv.className = 'chat-msg ai-msg typing-bubble';
+        typingDiv.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
         messagesEl.appendChild(typingDiv);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
+        scrollToBottom();
+
+        // Prevent double-sends while waiting
+        inputEl.disabled = true;
+        const done = () => { typingDiv.remove(); inputEl.disabled = false; inputEl.focus(); };
 
         fetch('/api/tirsweb/chat', {
             method: 'POST',
@@ -597,14 +629,48 @@ Cytora Extracted Data: ${JSON.stringify(currentSubmission.cytora_entries || {})}
         })
         .then(res => res.json())
         .then(data => {
-            document.getElementById(typingId)?.remove();
-            appendMsg(data.reply, 'ai');
+            done();
+            appendMsg(data.reply, 'ai', data.sources);
         })
         .catch(err => {
             console.error(err);
-            document.getElementById(typingId)?.remove();
+            done();
             appendMsg('Failed to connect to TA Assistant.', 'ai');
         });
+    }
+
+    function escapeHtml(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // Minimal, safe Markdown: **bold**, *italic*, `code`, "- " / "* " / "1. " lists, line breaks
+    function renderChatMarkdown(text) {
+        const inline = s => escapeHtml(s)
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/(^|[^*])\*([^*\s][^*]*?)\*/g, '$1<em>$2</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        const lines = String(text ?? '').split(/\r?\n/);
+        let html = '';
+        let listTag = null;
+        const closeList = () => { if (listTag) { html += `</${listTag}>`; listTag = null; } };
+
+        lines.forEach(line => {
+            const bullet = line.match(/^\s*[-*•]\s+(.*)$/);
+            const numbered = line.match(/^\s*\d+[.)]\s+(.*)$/);
+            if (bullet || numbered) {
+                const tag = bullet ? 'ul' : 'ol';
+                if (listTag !== tag) { closeList(); html += `<${tag}>`; listTag = tag; }
+                html += `<li>${inline((bullet || numbered)[1])}</li>`;
+            } else {
+                closeList();
+                const heading = line.match(/^\s*#{1,6}\s+(.*)$/);
+                if (heading) html += `<p><strong>${inline(heading[1])}</strong></p>`;
+                else if (line.trim()) html += `<p>${inline(line)}</p>`;
+            }
+        });
+        closeList();
+        return html || '<p></p>';
     }
 
     if (chatbotSendBtn) {

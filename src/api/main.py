@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from configs.settings import get_settings, Settings
+from src.llm_client import get_llm_client
 from src.ingestion.file_manager import FileManager
 from src.ingestion.document_processor import DocumentProcessor
 from src.ingestion.chunker import Chunker
@@ -46,9 +47,10 @@ def _initialize_components():
         max_tokens=_settings.max_chunk_tokens,
         overlap_tokens=_settings.chunk_overlap_tokens,
     )
+    llm_client = get_llm_client(_settings)
     embedder = Embedder(
-        api_key=_settings.gemini_api_key,
-        model=_settings.gemini_embed_model,
+        llm_client=llm_client,
+        model=_settings.get_embed_model,
     )
     _indexer = Indexer(_settings.chroma_db_dir)
 
@@ -63,8 +65,8 @@ def _initialize_components():
     search_client = SearchClient(embedder=embedder, indexer=_indexer)
     _query_engine = QueryEngine(
         search_client=search_client,
-        api_key=_settings.gemini_api_key,
-        llm_model=_settings.gemini_llm_model,
+        llm_client=llm_client,
+        llm_model=_settings.get_llm_model,
         fallback_models=_settings.fallback_models_list,
         temperature=_settings.temperature,
         max_output_tokens=_settings.max_output_tokens,
@@ -72,7 +74,11 @@ def _initialize_components():
         top_k=_settings.top_k_results,
     )
 
-    logger.info("All components initialized successfully")
+    logger.info(
+        f"All components initialized successfully (provider: {llm_client.provider.value}, "
+        f"llm: {_settings.get_llm_model}, embed: {_settings.get_embed_model}, "
+        f"api key set: {llm_client.has_api_key})"
+    )
 
 
 # ── Dependency accessors ──
@@ -96,6 +102,10 @@ def get_query_engine() -> QueryEngine:
 
 def get_indexer() -> Indexer:
     return _indexer
+
+
+def get_search_client() -> SearchClient:
+    return _query_engine.search_client
 
 
 # ── App lifecycle ──
@@ -176,8 +186,8 @@ def health_check():
     idx_stats = _indexer.get_stats() if _indexer else {"total_chunks": 0}
     return HealthResponse(
         status="ok",
-        gemini_model=_settings.gemini_llm_model,
-        embed_model=_settings.gemini_embed_model,
+        gemini_model=_settings.get_llm_model,
+        embed_model=_settings.get_embed_model,
         documents_dir=str(_settings.documents_path),
         total_chunks=idx_stats["total_chunks"],
     )

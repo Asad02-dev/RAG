@@ -1,9 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Any
-from google import genai
-from google.genai import types
 from configs.settings import get_settings
+from src.llm_client import get_llm_client, candidate_models
 
 router = APIRouter()
 
@@ -36,9 +35,6 @@ def generate_summary(request: SummarizeRequest):
         except Exception:
             pass # fallback to regenerate
 
-    # Ensure we strictly use the Gemma model
-    llm_model = getattr(settings, 'gemini_llm_model', "gemma-4-26b-a4b-it")
-    
     # Aggressively truncate to stay under the 16k token limit
     email_text = str(request.email_body)[:10000]
     cytora_text = str(request.cytora_json)[:5000]
@@ -86,28 +82,22 @@ def generate_summary(request: SummarizeRequest):
     {cytora_text}
     """
     
-    client = genai.Client(api_key=settings.gemini_api_key or "dummy-api-key")
-    
-    models_to_try = [llm_model] + getattr(settings, 'fallback_models_list', [])
-    response = None
+    llm = get_llm_client(settings)
+
+    models_to_try = candidate_models(settings.get_llm_model, settings.fallback_models_list)
+    html = None
     last_err = None
     for m in models_to_try:
         try:
-            response = client.models.generate_content(
-                model=m,
-                contents=prompt,
-                config=types.GenerateContentConfig(temperature=0.2)
-            )
+            html = llm.generate(model=m, prompt=prompt, temperature=0.2)
             break
         except Exception as e:
             last_err = e
             continue
-            
-    if not response:
+
+    if html is None:
         raise last_err
-    
-    
-    html = response.text
+
     if html.startswith("```html"):
         html = html.split("```html", 1)[1].rsplit("```", 1)[0]
     elif html.startswith("```"):
@@ -177,8 +167,8 @@ def extract_fields(request: ExtractFieldsRequest):
     # 2. Extract remaining fields via Gemini
     llm_fields = {}
     if remaining_fields:
-        client = genai.Client(api_key=settings.gemini_api_key or "dummy-api-key")
-        
+        llm = get_llm_client(settings)
+
         email_text = str(request.email_body)[:15000] # Aggressively truncate
         
         prompt = f"""
@@ -198,27 +188,23 @@ def extract_fields(request: ExtractFieldsRequest):
         {remaining_fields}
         """
         
-        llm_model = getattr(settings, 'gemini_llm_model', "gemma-4-26b-a4b-it")
-        
-        models_to_try = [llm_model] + getattr(settings, 'fallback_models_list', [])
-        response = None
+        models_to_try = candidate_models(settings.get_llm_model, settings.fallback_models_list)
+        response_text = None
         for m in models_to_try:
             try:
-                response = client.models.generate_content(
+                response_text = llm.generate(
                     model=m,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        temperature=0.1,
-                        max_output_tokens=4096,
-                        response_mime_type="application/json",
-                    )
+                    prompt=prompt,
+                    temperature=0.1,
+                    max_output_tokens=4096,
+                    json_mode=True,
                 )
                 break
             except Exception:
                 continue
-        
+
         try:
-            data = json.loads(response.text)
+            data = json.loads(response_text)
             if isinstance(data, list) and len(data) > 0:
                 llm_fields = data[0]
             elif isinstance(data, dict):
@@ -239,50 +225,109 @@ def extract_fields(request: ExtractFieldsRequest):
         
     return ExtractFieldsResponse(extracted_data=final_data)
 
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+TIRSWEB_DATA_PATH = PROJECT_ROOT / "web" / "tirsweb" / "data.json"
+SUMMARIES_DIR = PROJECT_ROOT / "data" / "summaries"
+MAX_EMAIL_BODY_CHARS = 8000
+
 class ChatRequest(BaseModel):
     message: str
-    submission_context: str
+    submission_id: str | None = None
 
 class ChatResponse(BaseModel):
     reply: str
+    sources: list[dict] = []
+    summary_used: bool = False
+
+def _load_submission(submission_id: str) -> dict | None:
+    import json
+    if not TIRSWEB_DATA_PATH.exists():
+        return None
+    with open(TIRSWEB_DATA_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return next((s for s in data.get("submissions", []) if s.get("id") == submission_id), None)
 
 @router.post("/chat", response_model=ChatResponse)
 def handle_chat(request: ChatRequest):
-    settings = get_settings()
-    client = genai.Client(api_key=settings.gemini_api_key or "dummy-api-key")
-    
-    import re
-    
-    # Clean up the context to avoid 500 errors from massive HTML/Base64 payloads
-    clean_context = re.sub(r'<[^>]+>', ' ', request.submission_context) # strip HTML tags
-    clean_context = clean_context[:15000] # Truncate heavily for Gemma 16k limit
+    """Answer a question about one submission, grounded in its summary, data.json entry and its own ChromaDB chunks.
 
-    prompt = f"""
-    You are a Technical Assistant (TA) Underwriting Chatbot. Answer the user's question concisely based on the following submission context.
-    If you don't know the answer based on the context, say so.
-    
-    Submission Context:
-    {clean_context}
-    
-    User Question:
-    {request.message}
+    With no submission_id, answer from all documents in ChromaDB instead.
     """
-    
-    llm_model = getattr(settings, 'gemini_llm_model', "gemma-4-26b-a4b-it")
-    
-    models_to_try = [llm_model] + getattr(settings, 'fallback_models_list', [])
+    import logging
+    from src.api.main import get_search_client
+    from src.ingestion.document_processor import DocumentProcessor
+    from src.retrieval.prompts import SYSTEM_PROMPT, build_submission_chat_prompt
+
+    logger = logging.getLogger(__name__)
+
+    if not request.submission_id:
+        # No submission open: answer from all documents in the vector DB (same as the general /api/query chat)
+        from src.api.main import get_query_engine
+        result = get_query_engine().query(request.message)
+        return ChatResponse(reply=result.answer, sources=result.sources)
+
+    submission = _load_submission(request.submission_id)
+    if not submission:
+        return ChatResponse(reply=f"Submission '{request.submission_id}' was not found.")
+
+    settings = get_settings()
+    llm = get_llm_client(settings)
+    if not llm.has_api_key:
+        return ChatResponse(reply=f"{llm.key_env_name} is not set. Please add your API key to `.env`.")
+
+    # 1. Saved 1-page summary (optional)
+    summary_text = None
+    summary_file = SUMMARIES_DIR / f"{request.submission_id}.html"
+    if summary_file.exists():
+        summary_text = DocumentProcessor._html_to_markdown(summary_file.read_text(encoding="utf-8"))
+
+    # 2. Email body from data.json (stored as HTML)
+    email = submission.get("email") or {}
+    email_body_text = DocumentProcessor._html_to_markdown(str(email.get("body") or ""))[:MAX_EMAIL_BODY_CHARS]
+
+    # 3. ChromaDB chunks belonging to this email only
+    search_results = []
+    email_file = email.get("filename")
+    if email_file:
+        try:
+            search_results = get_search_client().search(
+                query=request.message,
+                top_k=settings.top_k_results,
+                filter_metadata={"file_name": email_file},
+            )
+        except Exception as e:
+            logger.warning(f"Chunk search failed for {email_file}: {e}. Answering without document chunks.")
+
+    prompt = build_submission_chat_prompt(
+        question=request.message,
+        submission=submission,
+        summary_text=summary_text,
+        email_body_text=email_body_text,
+        search_results=search_results,
+    )
+    full_prompt = f"{SYSTEM_PROMPT}\n\n---\n\n{prompt}"
+
+    models_to_try = candidate_models(settings.get_llm_model, settings.fallback_models_list)
     reply = "Sorry, I encountered an error: All models failed."
     for m in models_to_try:
         try:
-            response = client.models.generate_content(
-                model=m,
-                contents=prompt,
-                config=types.GenerateContentConfig(temperature=0.3)
-            )
-            reply = response.text
+            reply = llm.generate(model=m, prompt=full_prompt, temperature=0.3)
             break
         except Exception as e:
             reply = f"Sorry, I encountered an error: {str(e)}"
             continue
-        
-    return ChatResponse(reply=reply)
+
+    sources = []
+    seen = set()
+    for r in search_results:
+        meta = r.get("metadata", {})
+        key = (meta.get("file_name"), meta.get("page_number"), meta.get("section_heading"))
+        if key not in seen:
+            seen.add(key)
+            sources.append({
+                "file_name": meta.get("file_name", "unknown"),
+                "page_number": meta.get("page_number", 0),
+                "section_heading": meta.get("section_heading", ""),
+            })
+
+    return ChatResponse(reply=reply, sources=sources, summary_used=summary_text is not None)

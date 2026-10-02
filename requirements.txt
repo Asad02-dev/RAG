@@ -1,0 +1,45 @@
+# RAG POC — Gemini-powered document intelligence & retrieval system
+# Python >= 3.11
+# Install: pip install -r requirements.txt
+# Mirrors pyproject.toml dependencies (plus dev/test tools).
+
+# --- LLM providers (embeddings + LLM); ACTIVE_MODEL_PROVIDER picks one, default openai ---
+openai>=1.66.0
+google-genai>=1.0.0
+
+# --- Document processing ---
+pypdf>=5.0.0
+python-docx>=1.1.0
+openpyxl>=3.1.0
+Pillow>=10.0.0
+
+# --- Vector DB ---
+chromadb>=0.5.0
+
+# --- Chunking ---
+tiktoken>=0.7.0
+langchain-text-splitters>=0.3.0
+
+# --- API / application ---
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-multipart>=0.0.9      # required by FastAPI UploadFile/File in /ingest
+aiofiles>=24.0.0
+typing-extensions>=4.0.0     # used in src/tirsweb/state.py
+
+# --- Utilities ---
+python-dotenv>=1.0.0
+rich>=13.0.0
+
+# --- TIRSWeb POC ---
+langgraph>=0.2.0
+langchain>=0.2.0
+elasticsearch>=8.0.0         # clearance search is currently mocked
+playwright>=1.40.0           # after install, run: playwright install chromium
+
+# --- Dev / tests ---
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
+httpx>=0.27.0                # required by fastapi.testclient.TestClient

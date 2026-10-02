@@ -118,41 +118,26 @@ class DocumentProcessor:
                 raise ValueError(f"Unsupported file format: {ext}")
 
     def _process_pdf(self, path: Path) -> ProcessedDocument:
-        """Extract content from PDF using Gemini API (primary) or pypdf (fallback)."""
+        """Extract content from PDF using the configured LLM provider (primary) or pypdf (fallback)."""
         content = ""
         page_count = 1
 
         try:
-            from google import genai
             from configs.settings import get_settings
-            
-            settings = get_settings()
-            if not settings.gemini_api_key or settings.gemini_api_key == "dummy-api-key":
-                raise ValueError("GEMINI_API_KEY is missing.")
+            from src.llm_client import get_llm_client
 
-            client = genai.Client(api_key=settings.gemini_api_key)
-            logger.info(f"Uploading {path.name} to Gemini File API for extraction...")
-            
-            uploaded_file = client.files.upload(file=str(path))
-            
+            settings = get_settings()
+            llm = get_llm_client(settings)
+            if not llm.has_api_key:
+                raise ValueError(f"{llm.key_env_name} is missing.")
+
+            logger.info(f"Sending {path.name} to {llm.provider.value} for extraction...")
             prompt = "Extract all text, tables, and structured content from this document and format it strictly as readable Markdown. Do not include introductory conversational text, just the raw extracted markdown content."
-            
-            response = client.models.generate_content(
-                model=settings.gemini_extraction_model,
-                contents=[uploaded_file, prompt]
-            )
-            
-            content = response.text
-            
-            try:
-                client.files.delete(name=uploaded_file.name)
-            except Exception as e:
-                logger.debug(f"Could not delete file {uploaded_file.name} from Gemini API: {e}")
-                
-            logger.info(f"PDF processed with Gemini API: {path.name}")
-            
+            content = llm.extract_from_file(settings.get_extraction_model, path, prompt)
+            logger.info(f"PDF processed with {llm.provider.value}: {path.name}")
+
         except Exception as e:
-            logger.warning(f"Gemini API PDF extraction failed for {path.name}: {e}. Falling back to pypdf.")
+            logger.warning(f"LLM PDF extraction failed for {path.name}: {e}. Falling back to pypdf.")
             content, page_count = self._process_pdf_fallback(path)
 
         return ProcessedDocument(
@@ -253,26 +238,18 @@ class DocumentProcessor:
         )
 
     def _process_image(self, path: Path) -> ProcessedDocument:
-        """Extract text from images using Gemini Vision API."""
+        """Extract text from images using the configured LLM provider's vision model."""
         try:
-            from google import genai
             from configs.settings import get_settings
-            from PIL import Image
-            
+            from src.llm_client import get_llm_client
+
             settings = get_settings()
-            client = genai.Client(api_key=settings.gemini_api_key or "dummy-api-key")
-            
-            image = Image.open(str(path))
+            llm = get_llm_client(settings)
             prompt = "Extract all text from this image and format it as Markdown. If there are tables or structures, preserve them."
-            
-            response = client.models.generate_content(
-                model=settings.gemini_extraction_model,
-                contents=[image, prompt]
-            )
-            text = response.text
-            logger.info(f"Image processed with Gemini API: {path.name}")
+            text = llm.extract_from_file(settings.get_extraction_model, path, prompt)
+            logger.info(f"Image processed with {llm.provider.value}: {path.name}")
         except Exception as e:
-            logger.error(f"Gemini Vision API failed for {path.name}: {e}. Falling back to error text.")
+            logger.error(f"Vision extraction failed for {path.name}: {e}. Falling back to error text.")
             text = f"[Image: {path.name} — OCR failed: {e}]"
 
         content = f"## Image: {path.name}\n\n{text.strip()}"

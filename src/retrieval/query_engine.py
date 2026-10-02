@@ -4,9 +4,7 @@ import logging
 import time
 from dataclasses import dataclass
 
-from google import genai
-from google.genai import types
-
+from src.llm_client import LLMClient, candidate_models
 from src.retrieval.search_client import SearchClient
 from src.retrieval.prompts import SYSTEM_PROMPT, build_prompt
 
@@ -27,14 +25,15 @@ class QueryResponse:
 class QueryEngine:
     """RAG query engine: embed query → search → generate grounded answer.
 
-    Uses Gemini for both embedding (via SearchClient) and generation.
+    Uses the configured LLM provider (OpenAI or Gemini) for both embedding
+    (via SearchClient) and generation.
     """
 
     def __init__(
         self,
         search_client: SearchClient,
-        api_key: str,
-        llm_model: str = "gemma-4-26b-a4b-it",
+        llm_client: LLMClient,
+        llm_model: str = "gpt-4o-mini",
         fallback_models: list[str] | None = None,
         temperature: float = 0.2,
         max_output_tokens: int = 2048,
@@ -42,14 +41,9 @@ class QueryEngine:
         top_k: int = 5,
     ):
         self.search_client = search_client
-        self.api_key = api_key
-        self.client = genai.Client(api_key=api_key or "dummy-api-key")
+        self.llm = llm_client
         self.llm_model = llm_model
-        self.fallback_models = (
-            fallback_models
-            if fallback_models is not None
-            else ["gemma-4-12b-a4b-it", "gemma-4-26b-a4b-it"]
-        )
+        self.fallback_models = fallback_models or []
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
         self.thinking_budget = thinking_budget
@@ -61,7 +55,7 @@ class QueryEngine:
         Steps:
             1. Search for relevant chunks via SearchClient
             2. Build augmented prompt with context
-            3. Generate answer with Gemini/Gemma LLM (with up to 3 fallback models)
+            3. Generate answer with the LLM (with up to 3 fallback models)
             4. Return answer with source citations
         """
         if not question.strip():
@@ -73,9 +67,9 @@ class QueryEngine:
                 chunks_retrieved=0,
             )
 
-        if not self.api_key or self.api_key == "dummy-api-key":
+        if not self.llm.has_api_key:
             return QueryResponse(
-                answer="⚠️ GEMINI_API_KEY is not set. Please add your Gemini API key to `.env` to enable AI query responses.",
+                answer=f"⚠️ {self.llm.key_env_name} is not set. Please add your API key to `.env` to enable AI query responses.",
                 sources=[],
                 query=question,
                 model=self.llm_model,
@@ -103,10 +97,7 @@ class QueryEngine:
         full_prompt = f"{SYSTEM_PROMPT}\n\n---\n\n{prompt}"
 
         # Step 3: Generate answer with LLM (with up to 3 fallback models)
-        models_to_try = [self.llm_model]
-        for fallback_model in self.fallback_models[:3]:
-            if fallback_model and fallback_model not in models_to_try:
-                models_to_try.append(fallback_model)
+        models_to_try = candidate_models(self.llm_model, self.fallback_models)
 
         answer = ""
         active_model = self.llm_model
@@ -120,19 +111,14 @@ class QueryEngine:
             # Try model; retry once only on transient 503 error
             for attempt in range(2):
                 try:
-                    config_kwargs = {
-                        "temperature": self.temperature,
-                        "max_output_tokens": self.max_output_tokens,
-                    }
-                    if "gemini-3" in model_candidate:
-                        config_kwargs["thinking_config"] = types.ThinkingConfig(thinking_budget=self.thinking_budget)
-                        
-                    response = self.client.models.generate_content(
+                    text = self.llm.generate(
                         model=model_candidate,
-                        contents=full_prompt,
-                        config=types.GenerateContentConfig(**config_kwargs),
+                        prompt=full_prompt,
+                        temperature=self.temperature,
+                        max_output_tokens=self.max_output_tokens,
+                        thinking_budget=self.thinking_budget,
                     )
-                    answer = response.text or "No response generated."
+                    answer = text or "No response generated."
                     active_model = model_candidate
                     logger.info(f"Answer successfully generated using '{model_candidate}'")
                     break
@@ -150,7 +136,7 @@ class QueryEngine:
                             f"Model '{model_candidate}' quota exhausted (429). Trying next fallback model..."
                         )
                         break
-                    elif "503" in err_str or "UNAVAILABLE" in err_str:
+                    elif "503" in err_str or "UNAVAILABLE" in err_str or "overloaded" in err_str.lower():
                         if attempt == 0:
                             logger.warning(
                                 f"Model '{model_candidate}' temporarily unavailable (503). Retrying once in 1s..."
