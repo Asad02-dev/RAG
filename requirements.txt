@@ -4,7 +4,9 @@
 # Mirrors pyproject.toml dependencies (plus dev/test tools).
 
 # --- LLM providers (embeddings + LLM); ACTIVE_MODEL_PROVIDER picks one, default openai ---
-openai>=1.66.0
+openai>=3.0.0
+openai-agents==0.22.2
+neo4j==6.0.2
 google-genai>=1.0.0
 
 # --- Document processing ---

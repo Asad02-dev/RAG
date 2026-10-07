@@ -4,6 +4,21 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from configs.constants import ModelProvider
 
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6")
+NER_OPENAI_MODEL = os.getenv("NER_OPENAI_MODEL", "gpt-5.1")
+
+NEO4J_URI = os.getenv("NEO4J_URI")
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+NEO4J_DATABASE = os.getenv("NEO4J_DATABASE")
+
 
 class Settings(BaseSettings):
     """All application settings, loaded from .env file or environment variables."""

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Agent POC</title>
+    <meta name="description" content="Ask questions answered by the Neo4j graph agent.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🔍</span>
+                    <span class="logo-text">RAG System</span>
+                </div>
+                <span class="badge">POC</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span class="nav-icon">💬</span>
+                    <span>Chat</span>
+                </a>
+                <a href="/documents" class="nav-item">
+                    <span class="nav-icon">📄</span>
+                    <span>Documents</span>
+                </a>
+                <a href="/agent" class="nav-item active">
+                    <span class="nav-icon">🕸️</span>
+                    <span>Agent</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-stats">
+                <h3 class="stats-title">Session</h3>
+                <div class="stat-row">
+                    <span class="stat-label">ID</span>
+                    <span class="stat-value" id="session-id">—</span>
+                </div>
+            </div>
+
+            <div class="sidebar-stats">
+                <h3 class="stats-title">Ingest JSON</h3>
+                <input type="file" id="json-file-input" accept=".json,application/json" multiple hidden>
+                <button class="action-btn primary" id="ingest-json-btn" style="width: 100%;">📥 Choose JSON file(s)</button>
+                <div id="ingest-status" style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary); word-break: break-word;"></div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-main">
+            <!-- Header -->
+            <header class="chat-header">
+                <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">☰</button>
+                <h1 class="chat-title">Graph Agent POC</h1>
+                <button class="clear-btn" id="clear-chat" title="Start a new session">🗑️ New session</button>
+            </header>
+
+            <!-- Messages -->
+            <div class="messages-container" id="messages-container">
+                <div class="welcome-message" id="welcome-message">
+                    <div class="welcome-icon">🕸️</div>
+                    <h2>Graph Agent POC</h2>
+                    <p>Ask questions answered from the Neo4j knowledge graph.</p>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <textarea
+                        id="query-input"
+                        class="query-input"
+                        placeholder="Ask the graph agent..."
+                        rows="1"
+                        aria-label="Message input"
+                    ></textarea>
+                    <button class="send-btn" id="send-btn" aria-label="Send message" disabled>
+                        <span class="send-icon">➤</span>
+                    </button>
+                </div>
+                <p class="input-hint">Press Enter to send • Shift+Enter for new line</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/agent.js"></script>
+</body>
+</html>

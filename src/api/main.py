@@ -134,10 +134,15 @@ app = FastAPI(
 from src.api.routes import query as query_routes
 from src.api.routes import ingest as ingest_routes
 from src.api.routes import tirsweb as tirsweb_routes
+from src.api.routes import agent_query as agent_query_routes
+from src.api.routes import neo4j_ingest as neo4j_ingest_routes
 
 app.include_router(query_routes.router, prefix="/api", tags=["Query"])
 app.include_router(ingest_routes.router, prefix="/api", tags=["Documents"])
 app.include_router(tirsweb_routes.router, prefix="/api/tirsweb", tags=["TIRSWeb"])
+app.include_router(agent_query_routes.router, prefix="/api", tags=["Agent"])
+app.include_router(neo4j_ingest_routes.router, prefix="/api", tags=["Neo4j"])
+
 
 # ── Mount Web UI static files ──
 
@@ -166,6 +171,15 @@ async def serve_documents_page():
     if docs_path.exists():
         return FileResponse(str(docs_path))
     return {"message": "Documents page not found."}
+
+
+@app.get("/agent", include_in_schema=False)
+async def serve_agent_page():
+    """Serve the Graph Agent POC page."""
+    agent_path = WEB_DIR / "agent.html"
+    if agent_path.exists():
+        return FileResponse(str(agent_path))
+    return {"message": "Agent page not found."}
 
 
 @app.get("/tirsweb", include_in_schema=False)
