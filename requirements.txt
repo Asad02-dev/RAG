@@ -32,6 +32,7 @@ typing-extensions>=4.0.0     # used in src/tirsweb/state.py
 # --- Utilities ---
 python-dotenv>=1.0.0
 rich>=13.0.0
+typesafe-sdk>=0.7.0
 
 # --- TIRSWeb POC ---
 langgraph>=0.2.0

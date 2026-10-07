@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     openai_llm_model_complex: str = "gpt-4o-mini"
     openai_llm_fallback_models: str = "gpt-4o-mini"
 
+    # ── TypeSafe API ──
+    typesafe_api_key: str = ""
+
     @property
     def fallback_models_list(self) -> list[str]:
         """Return up to 3 fallback models as a list of strings depending on active provider."""

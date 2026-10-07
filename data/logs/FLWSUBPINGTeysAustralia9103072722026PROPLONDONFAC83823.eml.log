@@ -1,0 +1,10 @@
+[2026-10-05T16:56:13.456179] INGESTION_START: Started processing FLWSUBPINGTeysAustralia9103072722026PROPLONDONFAC83823.eml
+[2026-10-05T16:56:13.456668] VECTOR_DB_SUCCESS: Successfully stored in Vector DB
+[2026-10-05T16:56:13.517974] CLASSIFICATION: Starting classification using Jev (TypeSafe)
+[2026-10-05T16:56:14.269874] CLASSIFICATION_ERROR: Jev API Error: POST https://api.typesafe.ai/v1/systemone: 401 Cannot authenticate with the server. Please check your API key and try again. (request_id=req_01a10bebeb497c21be874d7bad909e7e)
+[2026-10-05T16:56:14.271468] EXTRACTION: Extracting key fields using LLM
+[2026-10-05T16:56:17.539311] EXTRACTION_SUCCESS: Extracted: {"Insured Name": "Teys Australia", "Limits Requested": "AUD 3,765,946,822", "Deductibles": "AUD 14m", "Line of Business": "-"}
+[2026-10-05T16:56:17.539763] ROUTING: Determining queue and action based on label 'Other'
+[2026-10-05T16:56:17.540788] ROUTING_SUCCESS: Assigned to UNASSIGNED (UNASSIGNED_QUEUE) with action: Manual review required
+[2026-10-05T16:56:17.544281] QUEUE_UPDATE: Successfully appended document to UNASSIGNED queue in data.json
+[2026-10-05T16:56:17.545285] INGESTION_END: Pipeline processing completed

@@ -1,16 +1,23 @@
 {
-  "queue-emails\\FWMKBRSAMONDIALRenewalProperty2627MDSRESubmission154_LACPROPERTYFAC_153294.eml": {
+  "FLWSUBPINGTeysAustralia9103072722026PROPLONDONFAC83823.eml": {
     "ingested": true,
-    "ingested_at": "2026-10-02T16:43:51.539603+00:00",
-    "modified_at": "",
-    "chunk_count": 59,
-    "size_bytes": 13906837
+    "ingested_at": "2026-10-05T11:56:13.449997+00:00",
+    "modified_at": "2026-10-05T11:55:34.481721+00:00",
+    "chunk_count": 7,
+    "size_bytes": 37374
   },
-  "queue-emails\\CANTERBURYTOWERSINCTransReCert910376309DocumentRequestNotification_Profliability_153319.eml": {
+  "RVALURALCOHOLESDELURUGUAYTROBSERENOVACIONG1428_LACCASFAC_test_6793.eml": {
     "ingested": true,
-    "ingested_at": "2026-10-02T16:43:52.165345+00:00",
-    "modified_at": "",
-    "chunk_count": 2,
-    "size_bytes": 9901
+    "ingested_at": "2026-10-05T12:43:29.654904+00:00",
+    "modified_at": "2026-10-05T12:43:05.733661+00:00",
+    "chunk_count": 11,
+    "size_bytes": 246565
+  },
+  "NewBusinessSubmissionlAvisBudgetGroupInclSideAlAXISlEff1032_Profliability_153283.eml": {
+    "ingested": true,
+    "ingested_at": "2026-10-05T13:22:10.228997+00:00",
+    "modified_at": "2026-10-05T13:20:52.823118+00:00",
+    "chunk_count": 75,
+    "size_bytes": 1653611
   }
 }

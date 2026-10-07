@@ -1,0 +1,10 @@
+[2026-10-05T17:43:29.660785] INGESTION_START: Started processing RVALURALCOHOLESDELURUGUAYTROBSERENOVACIONG1428_LACCASFAC_test_6793.eml
+[2026-10-05T17:43:29.661579] VECTOR_DB_SUCCESS: Successfully stored in Vector DB
+[2026-10-05T17:43:44.984046] CLASSIFICATION: Starting classification using Jev (TypeSafe)
+[2026-10-05T17:43:45.674554] CLASSIFICATION_SUCCESS: Jev Classification: Update (Confidence: 0.55)
+[2026-10-05T17:43:45.675115] EXTRACTION: Extracting key fields using LLM
+[2026-10-05T17:43:47.327021] EXTRACTION_SUCCESS: Extracted: {"Insured Name": "ALUR (ALCOHOLES DEL URUGUAY)", "Limits Requested": "65.596.960", "Deductibles": "-", "Line of Business": "Property"}
+[2026-10-05T17:43:47.329290] ROUTING: Determining queue and action based on label 'Update'
+[2026-10-05T17:43:47.331346] ROUTING_SUCCESS: Assigned to ASSIGNED (ASSIGNED_TA) with action: Attach update to DMS
+[2026-10-05T17:43:47.336424] QUEUE_UPDATE: Successfully appended document to ASSIGNED queue in data.json
+[2026-10-05T17:43:47.337571] INGESTION_END: Pipeline processing completed

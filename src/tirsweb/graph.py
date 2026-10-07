@@ -1,5 +1,7 @@
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
+import os
+from typesafe_sdk import TypeSafeClient, Choice
 from src.tirsweb.state import UnderwritingState
 import configs.constants as const
 
@@ -15,26 +17,119 @@ chroma_client = MockChromaDBClient()
 
 # --- Node Implementations (Mock for Phase 1) ---
 
+LLM_CATEGORIES = {
+    "Submission": "Request for terms, quote, or renewal terms. Contains submission pack. Not a reply inside an existing thread.",
+    "Update": "Supplying info or docs for an existing risk (reply, loss runs, clarification, quote feedback). No new request for terms.",
+    "Policy_Review": "Issued policy, binder, endorsement, or dec page attached for review.",
+    "Declination": "Deal is explicitly declined, not proceeding, withdrawn, placed elsewhere. Not just the word 'premium decline'.",
+    "Other": "Any other intent, noise, or unclassified."
+}
+
 def email_ingestion_node(state: UnderwritingState) -> UnderwritingState:
     print("Executing: email_ingestion_node")
-    # Generate 1-page summary and categorize intent
-    worksheet = state.get("stitch_worksheet", {})
-    worksheet["summary"] = "Mock 1-page summary generated from email."
     
     email_raw = state.get("email_raw", {})
-    subject = email_raw.get("subject", "").lower()
+    subject = email_raw.get("subject", "")
+    body = email_raw.get("body", "")
+    cytora_json = state.get("cytora_json", {})
+    cytora_intent = cytora_json.get("intent", "Unknown") # Mock cytora intent
+    has_open_submission = state.get("has_open_submission", False) # Mock code signal
+    has_bound_submission = state.get("has_bound_submission", False) # Mock code signal
     
-    if "follow up" in subject or "fwd" in subject:
-        email_category = const.EmailCategory.FOLLOW_UP
-        assigned_queue = const.TaskQueue.ASSIGNED_TA
-        ta_actions_pending = [const.TaskAction.ATTACH_UPDATE_DMS]
-    else:
+    # 1. Code Noise Gate
+    if "out of office" in subject.lower():
+        # Handle noise early, skip LLM
+        return {
+            "email_category": "UNCLASSIFIED",
+            "assigned_queue": const.TaskQueue.ASSIGNED_TA,
+            "ta_actions_pending": [],
+            "audit_trail": state.get("audit_trail", []) + ["Noise gate triggered (out of office)"]
+        }
+        
+    # 2. LLM Call
+    ts_client = TypeSafeClient(api_key=os.getenv("TYPESAFE_API_KEY", "mock"))
+    
+    try:
+        response = ts_client.system_one(
+            state=f"Subject: {subject}\nBody: {body}",
+            questions={
+                "intent": Choice(
+                    instructions="Pick the label that fits the sender's main purpose.",
+                    criteria=LLM_CATEGORIES
+                )
+            }
+        )
+        llm_label = response.choices["intent"].choice
+        llm_confidence = response.choices["intent"].confidence
+        evidence = ["(Mocked evidence quote 1)", "(Mocked evidence quote 2)"]
+    except Exception as e:
+        print(f"Jev API Error: {e}")
+        llm_label = "Other"
+        llm_confidence = 0.0
+        evidence = []
+
+    # 3. Code Reconciliation
+    suggested_action = None
+    confidence_band = None
+    notify_uw = False
+    
+    # Rule: LLM confidence < 0.70 gives no suggestion
+    if llm_confidence < 0.70:
+        pass # No suggestion
+    
+    # 1. Submission/Clearance Input -> suggest 1
+    elif llm_label == "Submission":
+        # Code checks: No strong match to open submission. Cytora is New/Renewal (or None). Not Follow-up.
+        if not has_open_submission and cytora_intent in ["New Business", "Renewal", "Unknown"]:
+            suggested_action = 1
+            confidence_band = "HIGH" if (cytora_intent in ["New Business", "Renewal"] and llm_confidence >= 0.85) else "MEDIUM"
+        
+    # 2. Attach/Update DMS -> suggest 9
+    elif llm_label == "Update":
+        if cytora_intent in ["Follow-up", "Unknown"]:
+            suggested_action = 9
+            confidence_band = "HIGH" if (has_open_submission or has_bound_submission) and llm_confidence >= 0.85 else "MEDIUM"
+            
+    # 3. Policy Review -> suggest 10
+    elif llm_label == "Policy_Review":
+        if has_bound_submission and cytora_intent not in ["New Business", "Renewal"]:
+            suggested_action = 10
+            confidence_band = "HIGH" if llm_confidence >= 0.85 else "MEDIUM"
+            
+    # 4. Declination -> suggest 9 + notify UW flag
+    elif llm_label == "Declination":
+        if has_open_submission and cytora_intent not in ["New Business", "Renewal"]:
+            suggested_action = 9
+            notify_uw = True
+            confidence_band = "HIGH" if llm_confidence >= 0.85 else "MEDIUM"
+            
+    # Final Routing Mapping Based on Action
+    if suggested_action == 1:
         email_category = const.EmailCategory.SUBMISSION
         assigned_queue = const.TaskQueue.UW_QUEUE_1
         ta_actions_pending = [const.TaskAction.CLEARANCE_RESOLVE, const.TaskAction.CREATE_SUBMISSION]
+    elif suggested_action == 9:
+        email_category = const.EmailCategory.FOLLOW_UP
+        assigned_queue = const.TaskQueue.ASSIGNED_TA
+        ta_actions_pending = [const.TaskAction.ATTACH_UPDATE_DMS]
+    elif suggested_action == 10:
+        email_category = const.EmailCategory.FOLLOW_UP # Mapping to existing enum
+        assigned_queue = const.TaskQueue.ASSIGNED_TA
+        ta_actions_pending = ["ACTION_POLICY_REVIEW"]
+    else:
+        # No Suggestion / Abstain
+        email_category = "UNCLASSIFIED"
+        assigned_queue = const.TaskQueue.ASSIGNED_TA
+        ta_actions_pending = []
 
     audit_trail = state.get("audit_trail", [])
     audit_trail.append(f"email_ingestion_node completed. Category: {email_category}")
+    audit_trail.append(f"LLM Label: {llm_label}, Conf: {llm_confidence}, Quotes: {evidence}")
+    audit_trail.append(f"Reconciled Action: {suggested_action}, Band: {confidence_band}, Notify UW: {notify_uw}")
+    
+    # Generate 1-page summary and categorize intent
+    worksheet = state.get("stitch_worksheet", {})
+    worksheet["summary"] = "Mock 1-page summary generated from email."
     
     return {
         "stitch_worksheet": worksheet,

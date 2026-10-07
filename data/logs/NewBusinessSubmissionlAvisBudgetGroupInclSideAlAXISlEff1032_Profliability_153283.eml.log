@@ -1,0 +1,11 @@
+[2026-10-05T18:22:10.233574] INGESTION_START: Started processing NewBusinessSubmissionlAvisBudgetGroupInclSideAlAXISlEff1032_Profliability_153283.eml
+[2026-10-05T18:22:10.234059] VECTOR_DB_SUCCESS: Successfully stored in Vector DB
+[2026-10-05T18:23:01.978426] CLASSIFICATION: Starting classification using Jev (TypeSafe)
+[2026-10-05T18:23:02.598198] JEV_RAW_RESPONSE: model='jev-1.13.0' usage=Usage(input_tokens=2064, output_tokens=56) answers={'intent': ChoiceAnswer(type='choice', choice='Submission', confidence=1.0, probabilities={'Other': 0.0, 'Declination': 0.0, 'Submission': 1.0, 'Update': 0.0, 'Policy_Review': 0.0})}
+[2026-10-05T18:23:02.598878] CLASSIFICATION_SUCCESS: Jev Classification: Submission (Confidence: 1.0)
+[2026-10-05T18:23:02.599312] EXTRACTION: Extracting key fields using LLM
+[2026-10-05T18:23:04.260189] EXTRACTION_SUCCESS: Extracted: {"Insured Name": "Avis Budget Group, Inc", "Limits Requested": "-", "Deductibles": "-", "Line of Business": "D&O General"}
+[2026-10-05T18:23:04.261010] ROUTING: Determining queue and action based on label 'Submission'
+[2026-10-05T18:23:04.261685] ROUTING_SUCCESS: Assigned to ASSIGNED (UW_QUEUE_1) with action: Proceed to clearance and generate quote
+[2026-10-05T18:23:04.270316] QUEUE_UPDATE: Successfully appended document to ASSIGNED queue in data.json
+[2026-10-05T18:23:04.270770] INGESTION_END: Pipeline processing completed
