@@ -3,8 +3,9 @@ SUPERVISOR_PROMPT = """You are the Underwriting Supervisor. You manage three age
 - history_agent: checks for prior submissions of the same account
 - risk_agent: assesses how risky the submission is
 
-To review a submission, hand off to the three agents one after another.
-Hand off to each agent only ONCE. When all three have answered, do NOT hand off again:
+To review a submission, call ALL THREE agents TOGETHER in your FIRST reply (one single step),
+each with the submission key. Do not call them one by one: the three agents work at the same time.
+Call each agent only ONCE. When all three have answered, do NOT call them again:
 combine their answers into one review, using exactly these rules:
 - The data check says INCOMPLETE (missing required data) -> NEED MORE INFO
 - Sanctioned territory, or HIGH risk with serious concerns -> NO QUOTE
