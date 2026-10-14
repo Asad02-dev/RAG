@@ -40,6 +40,7 @@ langgraph>=0.2.0
 langgraph-checkpoint-sqlite>=3.0.0   # saves LangGraph case state to SQLite (src/langraph)
 langgraph-supervisor>=0.0.31          # prebuilt supervisor agent (src/supervisor_langgraph)
 langchain-openai>=1.0.0               # OpenAI models for LangChain/LangGraph agents
+streamlit>=1.40.0                     # simple frontend for the parallel review POC (src/parallel_langgraph)
 langchain>=0.2.0
 elasticsearch>=8.0.0         # clearance search is currently mocked
 playwright>=1.40.0           # after install, run: playwright install chromium

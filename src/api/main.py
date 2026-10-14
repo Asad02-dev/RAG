@@ -14,7 +14,7 @@ from src.ingestion.file_manager import FileManager
 from src.ingestion.document_processor import DocumentProcessor
 from src.ingestion.chunker import Chunker
 from src.ingestion.embedder import Embedder
-from src.ingestion.indexer import Indexer
+from src.ingestion.neo4j_indexer import Neo4jIndexer
 from src.ingestion.pipeline import IngestionPipeline
 from src.retrieval.search_client import SearchClient
 from src.retrieval.query_engine import QueryEngine
@@ -32,7 +32,7 @@ _settings: Settings | None = None
 _file_manager: FileManager | None = None
 _pipeline: IngestionPipeline | None = None
 _query_engine: QueryEngine | None = None
-_indexer: Indexer | None = None
+_indexer: Neo4jIndexer | None = None
 
 
 def _initialize_components():
@@ -52,7 +52,7 @@ def _initialize_components():
         llm_client=llm_client,
         model=_settings.get_embed_model,
     )
-    _indexer = Indexer(_settings.chroma_db_dir)
+    _indexer = Neo4jIndexer()
 
     _pipeline = IngestionPipeline(
         file_manager=_file_manager,
@@ -100,7 +100,7 @@ def get_query_engine() -> QueryEngine:
     return _query_engine
 
 
-def get_indexer() -> Indexer:
+def get_indexer() -> Neo4jIndexer:
     return _indexer
 
 

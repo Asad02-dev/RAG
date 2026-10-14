@@ -1,4 +1,4 @@
-"""Ingest specific documents into ChromaDB by file name.
+"""Ingest specific documents into Neo4j by file name.
 
 Usage (run from the project root with the server stopped):
     python -m scripts.ingest_files <file_name> [<file_name> ...]
@@ -31,7 +31,7 @@ def main(file_names: list[str]) -> int:
             print(f"  ERROR: {result.get('error')}")
             failed += 1
 
-    print(f"\nTotal chunks in ChromaDB: {indexer.get_stats()['total_chunks']}")
+    print(f"\nTotal chunks in Neo4j: {indexer.get_stats()['total_chunks']}")
     return 1 if failed else 0
 
 

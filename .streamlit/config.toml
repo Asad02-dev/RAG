@@ -1,0 +1,5 @@
+# Streamlit settings for the frontends in this project
+
+[client]
+# Hide the Deploy button and the ⋮ menu (theme, rerun, clear cache, print, record screen)
+toolbarMode = "minimal"
