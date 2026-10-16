@@ -15,7 +15,7 @@ from src.ingestion.file_manager import FileManager
 from src.ingestion.document_processor import DocumentProcessor
 from src.ingestion.chunker import Chunker
 from src.ingestion.embedder import Embedder
-from src.ingestion.indexer import Indexer
+from src.ingestion.neo4j_indexer import Neo4jIndexer
 from src.ingestion.pipeline import IngestionPipeline
 from src.retrieval.search_client import SearchClient
 from src.retrieval.query_engine import QueryEngine
@@ -44,7 +44,7 @@ def create_components():
         llm_client=llm_client,
         model=settings.get_embed_model,
     )
-    indexer = Indexer(settings.chroma_db_dir)
+    indexer = Neo4jIndexer()
 
     pipeline = IngestionPipeline(
         file_manager=file_manager,
@@ -68,7 +68,7 @@ def create_components():
     return file_manager, pipeline, query_engine, indexer, settings
 
 
-def show_status(file_manager: FileManager, indexer: Indexer, settings):
+def show_status(file_manager: FileManager, indexer: Neo4jIndexer, settings):
     """Display system status."""
     fm_stats = file_manager.get_stats()
     idx_stats = indexer.get_stats()

@@ -14,7 +14,7 @@ from src.ingestion.file_manager import FileManager
 from src.ingestion.document_processor import DocumentProcessor
 from src.ingestion.chunker import Chunker
 from src.ingestion.embedder import Embedder
-from src.ingestion.indexer import Indexer
+from src.ingestion.neo4j_indexer import Neo4jIndexer
 from src.ingestion.pipeline import IngestionPipeline
 from src.retrieval.search_client import SearchClient
 from src.retrieval.query_engine import QueryEngine
@@ -32,7 +32,7 @@ _settings: Settings | None = None
 _file_manager: FileManager | None = None
 _pipeline: IngestionPipeline | None = None
 _query_engine: QueryEngine | None = None
-_indexer: Indexer | None = None
+_indexer: Neo4jIndexer | None = None
 
 
 def _initialize_components():
@@ -52,7 +52,7 @@ def _initialize_components():
         llm_client=llm_client,
         model=_settings.get_embed_model,
     )
-    _indexer = Indexer(_settings.chroma_db_dir)
+    _indexer = Neo4jIndexer()
 
     _pipeline = IngestionPipeline(
         file_manager=_file_manager,
@@ -100,7 +100,7 @@ def get_query_engine() -> QueryEngine:
     return _query_engine
 
 
-def get_indexer() -> Indexer:
+def get_indexer() -> Neo4jIndexer:
     return _indexer
 
 
@@ -134,10 +134,15 @@ app = FastAPI(
 from src.api.routes import query as query_routes
 from src.api.routes import ingest as ingest_routes
 from src.api.routes import tirsweb as tirsweb_routes
+from src.api.routes import agent_query as agent_query_routes
+from src.api.routes import neo4j_ingest as neo4j_ingest_routes
 
 app.include_router(query_routes.router, prefix="/api", tags=["Query"])
 app.include_router(ingest_routes.router, prefix="/api", tags=["Documents"])
 app.include_router(tirsweb_routes.router, prefix="/api/tirsweb", tags=["TIRSWeb"])
+app.include_router(agent_query_routes.router, prefix="/api", tags=["Agent"])
+app.include_router(neo4j_ingest_routes.router, prefix="/api", tags=["Neo4j"])
+
 
 # ── Mount Web UI static files ──
 
@@ -166,6 +171,15 @@ async def serve_documents_page():
     if docs_path.exists():
         return FileResponse(str(docs_path))
     return {"message": "Documents page not found."}
+
+
+@app.get("/agent", include_in_schema=False)
+async def serve_agent_page():
+    """Serve the Graph Agent POC page."""
+    agent_path = WEB_DIR / "agent.html"
+    if agent_path.exists():
+        return FileResponse(str(agent_path))
+    return {"message": "Agent page not found."}
 
 
 @app.get("/tirsweb", include_in_schema=False)
