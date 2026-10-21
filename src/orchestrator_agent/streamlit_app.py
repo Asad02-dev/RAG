@@ -8,7 +8,7 @@ sys.path.insert(0, ".")   # so the "src..." and "configs..." imports work
 
 import streamlit as st
 
-from src.orchestrator_agent.agent import chat, history
+from src.orchestrator_agent.agent import chat, history, count_tokens
 
 
 # Example prompts, shown on the right to copy and paste
@@ -21,6 +21,13 @@ PROMPTS = [
     "What is the weather at the location of submission 1547704",
     "Give me forecast of next 15 days",
 ]
+
+
+def show_tokens(tokens: dict | None):
+
+    # The tokens used for one answer, in small grey text under it (nothing if OpenAI failed)
+    if tokens:
+        st.caption(f"Tokens: input {tokens['input']:,} · output {tokens['output']:,} · total {tokens['total']:,}")
 
 
 st.set_page_config(page_title="Orchestrator Agent", layout="wide")
@@ -43,12 +50,21 @@ question = st.chat_input("Ask a question")
 
 with chat_col:
 
-    # Show the saved conversation
+    # The saved conversation, split into turns: one question + the messages that answered it
+    turns = []
     for message in history(thread_id):
         if message.type == "human":
-            st.chat_message("user").write(message.text)
-        elif message.type == "ai" and message.text:
-            st.chat_message("assistant").write(message.text)
+            turns.append({"question": message.text, "messages": []})
+        elif turns:
+            turns[-1]["messages"].append(message)
+
+    for turn in turns:
+        st.chat_message("user").write(turn["question"])
+        answers = [m.text for m in turn["messages"] if m.type == "ai" and m.text]
+        if answers:
+            with st.chat_message("assistant"):
+                st.write(answers[-1])
+                show_tokens(count_tokens(turn["messages"]))
 
     if question:
 
@@ -63,11 +79,13 @@ with chat_col:
         logger.addHandler(handler)
 
         with st.spinner("Thinking..."):
-            answer = chat(thread_id, question)
+            answer, tokens = chat(thread_id, question)
 
         logger.removeHandler(handler)
 
-        st.chat_message("assistant").write(answer)
+        with st.chat_message("assistant"):
+            st.write(answer)
+            show_tokens(tokens)
 
         with st.expander("Logs"):
             st.code(logs.getvalue())

@@ -6,7 +6,7 @@ sys.path.insert(0, ".")   # so the "src..." and "configs..." imports work
 
 import streamlit as st
 
-from src.supervisor_langgraph.supervisor import app, chat, MAX_STEPS
+from src.supervisor_langgraph.supervisor import app, chat, MAX_STEPS, STOPPED_ANSWER
 
 
 # Example prompts, shown on the right to copy and paste
@@ -33,10 +33,11 @@ def show_step(message):
 
 def show_answer(messages: list):
 
-    # The final answer is the last message with text (the supervisor's reply)
-    answers = [m.text for m in messages if m.type == "ai" and m.text]
+    # The final answer is the supervisor's last reply.
+    # No reply from the supervisor = the agents were stopped after 2 tries (see MAX_STEPS).
+    answers = [m.text for m in messages if m.type == "ai" and m.name == "supervisor" and m.text]
     if not answers:
-        st.write("No answer was given for this question.")
+        st.warning(STOPPED_ANSWER)
         return
 
     # Colour it by the underwriter's decision: red = decline, yellow = need more info, green = quote

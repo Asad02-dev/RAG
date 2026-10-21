@@ -1,8 +1,10 @@
 import sys
 import sqlite3
 
+from langchain_core.messages import AIMessage
 from langgraph_supervisor import create_supervisor
 from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.errors import GraphRecursionError
 
 from src.supervisor_langgraph.llm import model
 from src.supervisor_langgraph.prompts import SUPERVISOR_PROMPT
@@ -13,8 +15,13 @@ from src.services.neo4j_service import driver
 # Every case's state is saved in this file, so it survives restarts
 DATABASE_PATH = "data/supervisor_cases.db"
 
-# Safety limit for the number of steps in one user message
-MAX_STEPS = 30
+# Safety limit for the number of steps in one user message. A normal answer takes 9 steps
+# (the TA looks up the facts, the Underwriter asks 1 question, the TA answers it, the Underwriter decides):
+# that is 2 tries. A 3rd try would go over the limit, and the case ends with STOPPED_ANSWER.
+MAX_STEPS = 10
+
+STOPPED_ANSWER = ("DECISION: NEED MORE INFO - The agents could not reach a decision after 2 tries. "
+                  "Please check the submission number or give more details.")
 
 
 # ── 1. Supervisor: the prebuilt LangGraph supervisor manages both agents ──
@@ -52,10 +59,15 @@ def chat(case_id: str, text: str) -> list:
 
     old_count = len(app.get_state(config).values.get("messages", []))
 
-    result = app.invoke(
-        {"messages": [{"role": "user", "content": text}]},
-        config,
-    )
+    try:
+        result = app.invoke(
+            {"messages": [{"role": "user", "content": text}]},
+            config,
+        )
+
+    except GraphRecursionError:
+        # The agents needed more than 2 tries: return a clear answer instead of an error
+        return [AIMessage(content=STOPPED_ANSWER, name="supervisor")]
 
     # Return only the messages created for this user message
     return result["messages"][old_count:]
