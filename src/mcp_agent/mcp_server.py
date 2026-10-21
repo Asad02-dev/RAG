@@ -21,7 +21,7 @@ logger.setLevel(logging.INFO)
 atexit.register(driver.close)
 
 # The server, named "tools"
-mcp = FastMCP("tools")
+mcp = FastMCP("tools", host="localhost", port=8000)
 
 
 @mcp.tool()
@@ -106,7 +106,7 @@ def get_submission(submission_key: str) -> str:
 if __name__ == "__main__":
 
     # "stdio": the server talks to the agent through its normal input and output
-    mcp.run(transport="stdio")
+    mcp.run(transport="streamable-http")
 
 
 
