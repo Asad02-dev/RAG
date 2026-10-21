@@ -19,6 +19,15 @@ NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 NEO4J_DATABASE = os.getenv("NEO4J_DATABASE")
 
+# Microsoft Foundry (Azure AI Foundry) project and model deployment
+FOUNDRY_PROJECT_ENDPOINT = os.getenv("FOUNDRY_PROJECT_ENDPOINT")
+FOUNDRY_MODEL_NAME = os.getenv("FOUNDRY_MODEL_NAME", "gpt-4o-mini")
+
+
+LANGSMITH_TRACING = os.getenv("LANGSMITH_TRACING")
+# LangSmith (tracing and evaluation)
+LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
+LANGSMITH_PROJECT = os.getenv("LANGSMITH_PROJECT", "guardrails-poc")
 
 class Settings(BaseSettings):
     """All application settings, loaded from .env file or environment variables."""
