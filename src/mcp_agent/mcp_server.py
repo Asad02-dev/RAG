@@ -88,8 +88,9 @@ def get_submission(submission_key: str) -> str:
 
     logger.info(f"[get_submission] {submission_key}")
 
+    # Some submissions keep their number in "name", others only in "submission_id"
     query = """
-    MATCH (s:Submission {name: $key})
+    MATCH (s:Submission) WHERE s.name = $key OR s.submission_id = $key
     OPTIONAL MATCH (s)-[r]-(n)
     RETURN properties(s) AS submission,
            collect({relationship: type(r), node: properties(n)}) AS linked
