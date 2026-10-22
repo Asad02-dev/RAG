@@ -11,8 +11,9 @@ def get_facts(submission_id: str) -> str:
     """Look up a submission in Neo4j by its number (e.g. "1547612").
     Returns the submission's properties and every node linked to it."""
 
+    # Some submissions keep their number in "name", others only in "submission_id"
     query = """
-    MATCH (s:Submission {name: $id})
+    MATCH (s:Submission) WHERE s.name = $id OR s.submission_id = $id
     OPTIONAL MATCH (s)-[r]-(n)
     RETURN properties(s) AS submission,
            collect(type(r) + ' -> ' + labels(n)[0] + ': ' + n.name) AS links

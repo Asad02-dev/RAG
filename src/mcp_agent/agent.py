@@ -16,13 +16,11 @@ logger = logging.getLogger("mcp_agent")
 MEMORY_FILE = "data/mcp_agent.db"
 
 
-# How to reach our MCP server: start "python -m src.mcp_agent.mcp_server" in the background
-# and talk to it through its input and output ("stdio")
+# Where our MCP server runs: start it first with  python -m src.mcp_agent.mcp_server
 mcp_client = MultiServerMCPClient({
     "tools": {
-        "command": sys.executable,                    # the same Python that runs this file
-        "args": ["-m", "src.mcp_agent.mcp_server"],
-        "transport": "stdio",
+        "url": "http://localhost:8000/mcp",           # the MCP server's address
+        "transport": "streamable_http",
     },
 })
 
